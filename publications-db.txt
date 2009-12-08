@@ -621,6 +621,14 @@ Lecture Notes in Computer Science
 <BLANK>
 http://portal.acm.org/citation.cfm?id=1484936
 
+misc
+Minh Van Nguyen
+Exploring Cryptography Using the Sage Computer Algebra System
+School of Engineering and Science, Victoria University, Australia
+2009
+BSc (Computer Science) Honours thesis
+http://www.sagemath.org/files/thesis/nguyen-thesis-2009.pdf
+
 inproceedings
 Pavel Solin and Ondrej Certik and Sameer Regmi
 The {FEM}hub Project and Classroom Teaching of Numerical Methods
