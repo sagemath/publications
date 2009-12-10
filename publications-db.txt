@@ -600,14 +600,6 @@ Cryptology ePrint Archive, Report 2009/497
 <BLANK>
 http://eprint.iacr.org/2009/497
 
-misc
-Cl{\'e}ment Pernet and William Stein
-Fast Computation of Hermite Normal Forms of Random Integer Matrices
-Home page of William Stein
-2009
-<BLANK>
-http://www.wstein.org/papers/hnf/
-
 inproceedings
 Subhamoy Maitra and Santanu Sarkar
 A New Class of Weak Encryption Exponents in RSA
@@ -628,6 +620,22 @@ School of Engineering and Science, Victoria University, Australia
 2009
 BSc (Computer Science) Honours thesis
 http://www.sagemath.org/files/thesis/nguyen-thesis-2009.pdf
+
+misc
+Robert W. Peck
+A {GAP} Tutorial for Transformation Music Theory
+<BLANK>
+2009
+<BLANK>
+<BLANK>
+
+misc
+Cl{\'e}ment Pernet and William Stein
+Fast Computation of Hermite Normal Forms of Random Integer Matrices
+Home page of William Stein
+2009
+<BLANK>
+http://www.wstein.org/papers/hnf/
 
 inproceedings
 Pavel Solin and Ondrej Certik and Sameer Regmi
