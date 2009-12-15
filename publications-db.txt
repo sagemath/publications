@@ -100,6 +100,19 @@ SIAM Review
 <BLANK>
 http://buzzard.ups.edu/bookreview/sage-beezer-review.pdf
 
+inproceedings
+Stefan Behnel and Robert W. Bradshaw and Dag Sverre Seljebotn
+Cython Tutorial
+Ga{\"e}l Varoquaux and St{\'e}fan van der Walt and K. Jarrod Millman
+SciPy 2009: Proceedings of the 8th Python in Science Conference
+<BLANK>
+<BLANK>
+<BLANK>
+4--14
+2009
+<BLANK>
+http://conference.scipy.org/proceedings/SciPy2009/paper_1/
+
 article
 Baur Bektemirov and Barry Mazur and William Stein and Mark Watkins
 Average Ranks of Elliptic Curves: Tension Between Data and Conjecture
@@ -248,6 +261,19 @@ arXiv:0712.3243
 2008
 <BLANK>
 http://arxiv.org/abs/0712.3243
+
+inproceedings
+Brian D'Urso
+Multiprocess System for Virtual Instruments in {P}ython
+Ga{\"e}l Varoquaux and St{\'e}fan van der Walt and K. Jarrod Millman
+SciPy 2009: Proceedings of the 8th Python in Science Conference
+<BLANK>
+<BLANK>
+<BLANK>
+76--80
+2009
+<BLANK>
+http://conference.scipy.org/proceedings/SciPy2009/paper_12/
 
 misc
 Ioannis Z. Emiris and Elias P. Tsigaridas and Antonios Varvitsiotis
@@ -638,17 +664,30 @@ Home page of William Stein
 http://www.wstein.org/papers/hnf/
 
 inproceedings
-Pavel Solin and Ondrej Certik and Sameer Regmi
-The {FEM}hub Project and Classroom Teaching of Numerical Methods
-G. Varoquaux and S. van der Walt and J. Millman
-Proceedings of the 8th Python in Science Conference (SciPy 2009)
+Dag Sverre Seljebotn
+Fast Numerical Computations with Cython
+Ga{\"e}l Varoquaux and St{\'e}fan van der Walt and K. Jarrod Millman
+SciPy 2009: Proceedings of the 8th Python in Science Conference
 <BLANK>
 <BLANK>
 <BLANK>
-1--5
+15--22
 2009
 <BLANK>
-http://conference.scipy.org
+http://conference.scipy.org/proceedings/SciPy2009/paper_2/
+
+inproceedings
+Pavel Solin and Ondrej Certik and Sameer Regmi
+The {FEM}hub Project and Classroom Teaching of Numerical Methods
+Ga{\"e}l Varoquaux and St{\'e}fan van der Walt and K. Jarrod Millman
+SciPy 2009: Proceedings of the 8th Python in Science Conference
+<BLANK>
+<BLANK>
+<BLANK>
+58--61
+2009
+<BLANK>
+http://conference.scipy.org/proceedings/SciPy2009/paper_9/
 
 incollection
 Jonathan Sondow and Kyle Schalm
