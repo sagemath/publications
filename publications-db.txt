@@ -416,6 +416,14 @@ arXiv:0906.2497
 http://arxiv.org/abs/0906.2497
 
 misc
+Florent Hivert and Anne Schilling and Nicolas M. Thi{\'e}ry
+The bi{H}ecke Monoid of A Finite {C}oxeter Group
+arXiv:0912.2212
+2009
+<BLANK>
+http://arxiv.org/abs/0912.2212
+
+misc
 Kimberly Hopkins
 Higher Weight Heegner Points
 arXiv:0904.1141
