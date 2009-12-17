@@ -76,6 +76,7 @@ PERMISSIONS = "755"
 # entry_entry
 # author
 # title
+# edition
 # publisher
 # year
 # url
@@ -1227,14 +1228,37 @@ def remove_blanks(entry):
     publication entry as represented by 'entry'. However, all attributes with
     the value '<BLANK>' are removed from this output dictionary.
     """
+    # The author's name can be the same as the publisher's name. In that
+    # case, concatentate the author's name with the word "publisher" and
+    # set the result as the publisher's name. Such a work-around is needed
+    # since a dictionary can only have unique keys.
+    from copy import copy
+    copied_entry = copy(entry)
+    self_published = False
+    author = ""
+    publisher = ""
+    if "publisher" in copied_entry:
+        author = copied_entry["author"]
+        publisher = copied_entry["publisher"]
+        if author == publisher:
+            self_published = True
+            publisher = "".join([author, "publisher"])
+            copied_entry.update({"publisher": publisher})
     # remove all but one 'blank' from the publication entry
-    processed_entry = dict(zip(entry.values(), entry.keys()))
+    processed_entry = dict(zip(copied_entry.values(), copied_entry.keys()))
     # finally remove the last remaining 'blank'
     try:
         del processed_entry[BLANK]
     except:
         pass
-    return dict(zip(processed_entry.values(), processed_entry.keys()))
+    processed_entry = dict(zip(processed_entry.values(),
+                               processed_entry.keys()))
+    # In case the author's name is the same as the publisher's name, now
+    # remove the extra string "publisher" at the end of the publisher's name.
+    if self_published:
+        publisher = publisher[:len(author)]
+        processed_entry.update({"publisher": publisher})
+    return processed_entry
 
 def remove_special(entry):
     r"""
