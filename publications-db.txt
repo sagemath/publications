@@ -100,6 +100,13 @@ SIAM Review
 <BLANK>
 http://buzzard.ups.edu/bookreview/sage-beezer-review.pdf
 
+book
+Robert A. Beezer
+A First Course in Linear Algebra
+Robert A. Beezer
+2009
+http://linear.ups.edu
+
 inproceedings
 Stefan Behnel and Robert W. Bradshaw and Dag Sverre Seljebotn
 Cython Tutorial
@@ -779,6 +786,13 @@ Home page of William Stein
 2009
 <BLANK>
 http://wstein.org/papers/shark/
+
+book
+William Stein et al.
+Sage Tutorial
+CreateSpace
+2009
+http://www.amazon.com/Sage-tutorial-version-3-4-Group/dp/1442141948/ref=sr_1_2?ie=UTF8&s=books&qid=1261010025&sr=1-2
 
 inproceedings
 Vesselin Velichkov and Vincent Rijmen and Bart Preneel
