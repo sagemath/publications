@@ -781,7 +781,7 @@ Home page of William Stein
 http://wstein.org/papers/shark/
 
 book
-William Stein et al.
+William Stein and others
 Sage Tutorial
 <BLANK>
 CreateSpace
