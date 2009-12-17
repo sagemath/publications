@@ -103,6 +103,7 @@ http://buzzard.ups.edu/bookreview/sage-beezer-review.pdf
 book
 Robert A. Beezer
 A First Course in Linear Algebra
+<BLANK>
 Robert A. Beezer
 2009
 http://linear.ups.edu
@@ -790,6 +791,7 @@ http://wstein.org/papers/shark/
 book
 William Stein et al.
 Sage Tutorial
+<BLANK>
 CreateSpace
 2009
 http://www.amazon.com/Sage-tutorial-version-3-4-Group/dp/1442141948/ref=sr_1_2?ie=UTF8&s=books&qid=1261010025&sr=1-2
