@@ -100,14 +100,6 @@ SIAM Review
 <BLANK>
 http://buzzard.ups.edu/bookreview/sage-beezer-review.pdf
 
-book
-Robert A. Beezer
-A First Course in Linear Algebra
-<BLANK>
-Robert A. Beezer
-2009
-http://linear.ups.edu
-
 inproceedings
 Stefan Behnel and Robert W. Bradshaw and Dag Sverre Seljebotn
 Cython Tutorial
