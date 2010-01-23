@@ -294,6 +294,14 @@ arXiv:0906.1437
 <BLANK>
 http://arxiv.org/abs/0906.1437
 
+unpublished
+Bernhard Esslinger and CrypTool Development Team
+The CrypTool Script: Cryptography, Mathematics and More
+German version available at http://www.cryptool.com/download/CrypToolScript-de.pdf
+19th January
+2010
+http://www.cryptool.com/download/CrypToolScript-en.pdf
+
 article
 Ron Evans
 Hypergeometric $_3F_2(1/4)$ Evaluations over Finite Fields and Hecke Eigenforms
