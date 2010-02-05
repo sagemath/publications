@@ -602,6 +602,14 @@ World Scientific
 <BLANK>
 http://arxiv.org/abs/0710.1835
 
+phdthesis
+Avra Laarakker
+Topological Properties of Tiles and Digit Sets
+Acadia University
+<BLANK>
+2009
+http://openarchive.acadiau.ca/cdm4/item_viewer.php?CISOROOT=/Theses&CISOPTR=526&CISOBOX=1&REC=10
+
 article
 David Loeffler
 Explicit Calculations of Automorphic Forms for Definite Unitary Groups
