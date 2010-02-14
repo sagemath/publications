@@ -313,6 +313,17 @@ Proceedings of the American Mathematical Society
 <BLANK>
 http://www.ams.org/proc/2010-138-02/S0002-9939-09-10091-6/
 
+article
+Ghislain Fourier and Masato Okado and Anne Schilling
+Perfectness of Kirillov-Reshetikhin Crystals for Nonexceptional Types
+Contemporary Mathematics
+506
+<BLANK>
+127--143
+2010
+<BLANK>
+http://arxiv.org/abs/0811.1604
+
 misc
 Irene Garcia-Selfa and Enrique Gonzalez-Jimenez and Jose M. Tornero
 Galois Theory, Discriminants and Torsion Subgroups of Elliptic Curves
@@ -464,6 +475,14 @@ Journal of Number Theory
 <BLANK>
 http://arxiv.org/abs/0802.2651
 
+misc
+Brant Jones and Anne Schilling
+Affine Structures and a Tableau Model for E_6 Crystals
+arXiv:0909.2442
+2010
+<BLANK>
+http://arxiv.org/abs/0909.2442
+
 article
 David Joyner
 On Quadratic Residue Codes and Hyperelliptic Curves
@@ -609,6 +628,14 @@ Acadia University
 <BLANK>
 2009
 http://openarchive.acadiau.ca/cdm4/item_viewer.php?CISOROOT=/Theses&CISOPTR=526&CISOBOX=1&REC=10
+
+misc
+Thomas Lam and Anne Schilling and Mark Shimozono
+K-theory Schubert Calculus of the Affine Grassmannian
+arXiv:0901.1506
+2009
+<BLANK>
+http://arxiv.org/abs/0901.1506
 
 article
 David Loeffler
