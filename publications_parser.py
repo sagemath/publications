@@ -50,11 +50,11 @@ PWD = os.getcwd()
 # the file containing the general publications database
 publications_general = os.path.join(PWD, "bibliography-sage.bib")
 # the file containing the Sage-Combinat publications database
-publications_combinat = os.path.join(PWD, "bibliography-combinat.bib")
+publications_combinat = os.path.join(PWD, "Sage-Combinat.bib")
 # the file containing the general bibliography formatted in HTML
-html_filename_general = os.path.join(PWD, "library-publications.html")
+html_general = os.path.join(PWD, "library-publications.html")
 # the file containing the Sage-Combinat bibliography formatted in HTML
-html_filename_combinat = os.path.join(PWD, "library-combinat.html")
+html_combinat = os.path.join(PWD, "library-publications-combinat.html")
 
 # Stuff relating to file permissions.
 # whether we should change the permissions of a file
@@ -1036,5 +1036,7 @@ def surname(name):
 
 # the driver section; this is where everything starts from
 if __name__ == "__main__":
-    db = process_database(publications_database)
-    output_html(db, html_filename)
+    db = process_database(publications_general)
+    output_html(db, html_general)
+    db = process_database(publications_combinat)
+    output_html(db, html_combinat)
