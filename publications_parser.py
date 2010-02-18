@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 ###########################################################################
-# Copyright (c) 2009 Minh Van Nguyen <nguyenminh2@gmail.com>
+# Copyright (c) 2009, 2010 Minh Van Nguyen <nguyenminh2@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,33 +18,43 @@
 
 # README
 #
-# The database of publications that cite Sage are contained in
-# the text file named by the variable publications_database. Each
-# publication entry is described in the format below. If you want to add
-# or delete items from the publications database, you should edit the file
-# named by the variable publications_database. Make sure that your edit
-# follows the formatting rules as documented below. Once you are done
-# editing the file named by publications_database, then run this script
-# which will generate an HTML page listing the publications. This script also
-# generates a BibTeX file listing the publications in BibTeX format. The
-# HTML page listing the publications has a link to this BibTeX file.
+# This script requires Pybtex for parsing a BibTeX database. See
+# https://launchpad.net/pybtex for more information about Pybtex.
+#
+# The general database of publications that cite Sage is contained in the
+# text file named by the variable publications_general. The file referred to
+# by this variable is a BibTeX database. Each publication entry is described
+# in BibTeX format. If you want to add or delete items from the publications
+# database, you should edit the file named by the variable
+# publications_general. Make sure that your edit follows the formatting rules
+# of BibTeX. Once you are done editing the file named by
+# publications_general, then run this script which will generate an HTML
+# page listing the publications. The HTML page listing the publications has a
+# link to the BibTeX database, i.e. the file referred to by the variable
+# publications_database.
 
+# importing modules from Python library
+import copy
+import re
 import os
 
+# importing modules from third-party library
+from pybtex.database.input import bibtex
+from pybtex.style.names import plain
+
 # make sure we're at the directory where the script is located
-os.chdir("/home/sage/www2-dev")
+os.chdir("/home/mvngu/apps/pubparse")
 # get the current working directory
 PWD = os.getcwd()
 
-# the file containing the publications database
-# publications_database = "publications-db.txt"
-publications_database = "".join([PWD, "/www/files/publications-db.txt"])
-# the file containing the bibliography formatted as per BibTeX style
-# bibtex_filename = "bibliography.bib"
-bibtex_filename = "".join([PWD, "/www/files/bibliography.bib"])
-# the file containing the bibliography formatted in HTML
-# html_filename = "library-publications.html"
-html_filename = "".join([PWD, "/www/library-publications.html"])
+# the file containing the general publications database
+publications_general = os.path.join(PWD, "bibliography-sage.bib")
+# the file containing the Sage-Combinat publications database
+publications_combinat = os.path.join(PWD, "bibliography-combinat.bib")
+# the file containing the general bibliography formatted in HTML
+html_filename_general = os.path.join(PWD, "library-publications.html")
+# the file containing the Sage-Combinat bibliography formatted in HTML
+html_filename_combinat = os.path.join(PWD, "library-combinat.html")
 
 # Stuff relating to file permissions.
 # whether we should change the permissions of a file
@@ -53,63 +63,14 @@ CHANGE_PERMISSIONS = True
 PERMISSIONS = "755"
 
 # Attributes associated with each type of publication. Attribute names
-# are the same as in BibTeX, except for the name "url". The name "url" is
-# designed for the purpose of this script. In the publications database,
-# each type of publication is represented as a block of lines. The first
-# line describes the type of that publication, and subsequent lines give
-# values for each attribute of that publication entry. For example, an
-# article is represented in the following format:
+# are the same as in BibTeX. In all of the publication types below, we use
+# the attribute "note" to specify a valid URL where the named publication
+# could be downloaded. A special exception is the case of the publication
+# type "misc". This type is used for specifiying both a preprint and an
+# undergraduate thesis. When "misc" is used for specifying an
+# undergraduate thesis, the attribute "note" contains both a valid URL and
+# the word "thesis".
 #
-# entry_type
-# author
-# title
-# journal
-# volume
-# number
-# pages
-# year
-# note
-# url
-#
-# A book is represented in the following format:
-#
-# entry_entry
-# author
-# title
-# edition
-# publisher
-# year
-# url
-#
-# Here is a snippet of the publications database where two publication
-# entries have been formatted according to the rules above:
-#
-# article
-# William Stein and David Joyner
-# SAGE: System for Algebra and Geometry Experimentation
-# ACM SIGSAM Bulletin
-# 39
-# 2
-# 61--64
-# 2005
-# <BLANK>
-# <BLANK>
-#
-# book
-# William Stein
-# Modular Forms, A Computational Approach
-# American Mathematical Society
-# 2007
-# http://www.ams.org/bookstore-getitem/item=gsm-79
-#
-# Note that each entry is separated by exactly one blank line. If there is
-# no specific value for an attribute, then we use the stub "<BLANK>".
-# Whenever possible, entries in the publications database should be sorted
-# alphabetically according to the authors' last name. Here's a
-# specification of the format of each entry in the publications database.
-
-BLANK = "<BLANK>"
-
 # The attributes that describe an article should be listed in this order in
 # the publications database.
 #
@@ -122,11 +83,7 @@ BLANK = "<BLANK>"
 # pages
 # year
 # note
-# url
-article_attributes = [
-    "author", "title", "journal", "volume", "number", "pages", "year",
-    "note", "url"]
-
+#
 # The attributes that describe a book should be listed in this order in
 # the publications database.
 #
@@ -136,9 +93,8 @@ article_attributes = [
 # edition
 # publisher
 # year
-# url
-book_attributes = ["author", "title", "edition", "publisher", "year", "url"]
-
+# note
+#
 # The attributes that describe a work in a collection should be listed in
 # this order in the publications database.
 #
@@ -150,11 +106,8 @@ book_attributes = ["author", "title", "edition", "publisher", "year", "url"]
 # pages
 # publisher
 # year
-# url
-incollection_attributes = [
-    "author", "title", "editor", "booktitle", "pages", "publisher",
-    "year", "url"]
-
+# note
+#
 # The attributes that describe a proceedings paper should be listed in
 # this order in the publications database.
 #
@@ -169,11 +122,7 @@ incollection_attributes = [
 # pages
 # year
 # note
-# url
-inproceedings_attributes = [
-    "author", "title", "editor", "booktitle", "publisher", "series",
-    "volume", "pages", "year", "note", "url"]
-
+#
 # The attributes that describe a Master's thesis should be listed in
 # this order in the publications database.
 #
@@ -183,12 +132,13 @@ inproceedings_attributes = [
 # school
 # address
 # year
-# url
-mastersthesis_attributes = [
-    "author", "title", "school", "address", "year", "url"]
-
+# note
+#
 # The attributes that describe a miscellaneous item should be listed in
-# this order in the publications database.
+# this order in the publications database. This publication type is used for
+# specifiying both a preprint and an undergraduate thesis. When "misc" is
+# used for specifying an undergraduate thesis, the attribute "note" contains
+# both a valid URL and the word "thesis".
 #
 # misc
 # author
@@ -196,9 +146,7 @@ mastersthesis_attributes = [
 # howpublished
 # year
 # note
-# url
-misc_attributes = ["author", "title", "howpublished", "year", "note", "url"]
-
+#
 # The attributes that describe a PhD thesis should be listed in
 # this order in the publications database.
 #
@@ -208,53 +156,147 @@ misc_attributes = ["author", "title", "howpublished", "year", "note", "url"]
 # school
 # address
 # year
-# url
-phdthesis_attributes = ["author", "title", "school", "address", "year", "url"]
-
+# note
+#
 # The attributes that describe an unpublished work should be listed in
 # this order in the publications database.
 #
 # unpublished
 # author
 # title
-# note
 # month
 # year
-# url
-unpublished_attributes = ["author", "title", "note", "month", "year", "url"]
+# note
+
 
 ### helper functions ######################################################
 
-def bibtex_citation(names, year):
+
+def extract_publication(entry_dict):
     r"""
-    Abbreviate the given authors' names so that the abbreviation could be
-    used when citing the authors' publication.
+    Extract a publication entry from the given dictionary.
 
     INPUT:
 
-    - names -- a string of author names, each name separated by 'and' just
-      as author names are separated in BibTeX format. The argument names
-      is assumed to contain at least one author name.
-
-    - year -- a year in four digits, e.g. 2009.
+    - entry_dict -- a dictionary containing a publication entry that was
+      parsed from a BibTeX database using Pybtex.
 
     OUTPUT:
 
-    An abbreviation of the given author names. This abbreviation can be
-    used when citing the authors' publication.
+    A dictionary representing a publication entry, where the keys are
+    BibTeX attributes for a publication type and the values corresponding to
+    the keys are attribute values. An article is represented using this
+    dictionary:
+
+    {'author': <authors-names>,
+     'title': <article-title>,
+     'journal': <journal-name>,
+     'volume': <volume-number>,
+     'number': <issue-number>,
+     'pages': <article-page-span>,
+     'year': <publication-year>,
+     'note': <url>}
+
+    A book is represented using this dictionary:
+
+    {'author': <authors-names>,
+     'title': <book-title>,
+     'edition': <book-edition>,
+     'publisher': <publisher-name>,
+     'year': <publication-year>,
+     'note': <url>}
+
+    A work in a collection is represented using this dictionary:
+
+    {'author': <authors-names>,
+     'title': <work-title>,
+     'editor': <collection-editor>,
+     'booktitle': <collection-title>,
+     'pages': <work-page-span>,
+     'publisher': <publisher-name>,
+     'year': <publication-year>,
+     'note': <url>}
+
+    A proceedings paper is represented using this dictionary:
+
+    {'author': <authors-names>,
+     'title': <article-title>,
+     'editor': <proceedings-editor>,
+     'booktitle': <proceedings-title>,
+     'publisher': <publisher-name>,
+     'series': <series-name>,
+     'volume': <volume-number>,
+     'pages': <article-page-span>,
+     'year': <publication-year>,
+     'note': <url>}
+
+    A Master's thesis is represented using this dictionary:
+
+    {'author': <authors-names>,
+     'title': <thesis-title>,
+     'school': <school-department-name>,
+     'address': <institution-address>,
+     'year': <completion-year>,
+     'note': <url>}
+
+    A miscellaneous item is represented using this dictionary:
+
+    {'author': <authors-names>,
+     'title': <item-title>,
+     'howpublished': <how-where-published>,
+     'year': <publication-year>,
+     'note': <url>}
+
+    A PhD thesis is represented using this dictionary:
+
+    {'author': <authors-names>,
+     'title': <thesis-title>,
+     'school': <school-department-name>,
+     'address': <institution-address>,
+     'year': <completion-year>,
+     'note': <url>}
+
+    An unpublished manuscript is represented using this dictionary:
+
+    {'author': <authors-names>,
+     'title': <manuscript-title>,
+     'month': <day-month>,
+     'year': <publication-year>,
+     'note': <url>}
     """
-    formatted_names = [name.strip() for name in names.split(" and ")]
-    # get author names for citation; only use last name
-    citation_name = ""
-    if len(formatted_names) == 1:
-        citation_name = formatted_names[0].split()[-1] + str(year)
-    elif len(formatted_names) == 2:
-        citation_name = formatted_names[0].split()[-1] + \
-            formatted_names[1].split()[-1] + str(year)
-    # the string of author names contains more than 2 names
-    else:
-        citation_name = formatted_names[0].split()[-1] + "EtAl" + str(year)
-    return remove_special(citation_name)
+    publication_dict = {}
+    for attribute in entry_dict.fields.keys():
+        publication_dict.setdefault(
+            str(attribute).strip(),
+            str(entry_dict.fields[attribute]).strip())
+    # The author field is a required field in BibTeX format.
+    # Extract author names.
+    authors_str = ""
+    authors_list = entry_dict.persons["author"]
+    authors_str = str(plain(authors_list[0]).format().plaintext())
+    if len(authors_list) > 1:
+        for author in authors_list[1:]:
+            authors_str = "".join([
+                    authors_str,
+                    " and ",
+                    str(plain(author).format().plaintext())])
+    authors_str = authors_str.replace("<nbsp>", " ")
+    publication_dict.setdefault("author", authors_str)
+    # The editor field is an optional field in BibTeX format.
+    # Extract editor names.
+    if "editor" in entry_dict.persons:
+        editors_str = ""
+        editors_list = entry_dict.persons["editor"]
+        editors_str = str(plain(editors_list[0]).format().plaintext())
+        if len(editors_list) > 1:
+            for editor in editors_list[1:]:
+                editors_str = "".join([
+                        editors_str,
+                        " and ",
+                        str(plain(editor).format().plaintext())])
+        editors_str = editors_str.replace("<nbsp>", " ")
+        publication_dict.setdefault("editor", editors_str)
+    return publication_dict
 
 def filter_undergraduate_theses(publications):
     r"""
@@ -268,21 +310,24 @@ def filter_undergraduate_theses(publications):
 
     OUTPUT:
 
-    Separate the preprints from the undergraduate theses.
+    Separate the preprints from the undergraduate theses. The publication
+    type 'misc' is used for specifiying both a preprint and an undergraduate
+    thesis. When 'misc' is used for specifying an undergraduate thesis, the
+    attribute 'note' contains both a valid URL and the word 'thesis'.
     """
     preprints = []
     undergraduate_theses = []
     for item in publications:
-        if "thesis" in item["note"].strip():
+        if ("note" in item) and ("thesis" in item["note"]):
             undergraduate_theses.append(item)
         else:
             preprints.append(item)
     return {"preprints": preprints,
             "undergraduatetheses": undergraduate_theses}
 
-def format_articles(articles, output="html"):
+def format_articles(articles):
     r"""
-    Format each article in either HTML or BibTeX format.
+    Format each article in HTML format.
 
     INPUT:
 
@@ -291,90 +336,30 @@ def format_articles(articles, output="html"):
       contain any preprints. Use the function format_preprints() to format a
       list of preprints. Each article is required to have the following
       mandatory attributes: author, title, journal, and year. Optional
-      attributes include: volume, number, pages, note, and url.
-
-    - output -- (default: 'html') the format in which to output each
-      article. The supported output formats are:
-
-      - 'html' -- output each article in HTML format suitable for displaying
-        on websites.
-
-      - 'bibtex' -- output each article in BibTeX format suitable for
-        further processing using LaTeX.
+      attributes include: volume, number, pages, and note.
 
     OUTPUT:
 
-    A list of articles all of which are formatted in either HTML or BibTeX
-    format.
+    A list of articles all of which are formatted in HTML suitable for
+    displaying on websites.
     """
     formatted_articles = []
-    if output == "html":
-        # format each article in HTML format
-        for article in articles:
-            article_noblanks = remove_blanks(article)
-            htmlstr = format_names(article_noblanks["author"]) + ". "
-            htmlstr += html_title(article_noblanks)
-            htmlstr += article_noblanks["journal"].strip() + ", "
-            attributes = ["volume", "number", "pages"]
-            for attribute in attributes:
-                if attribute in article_noblanks:
-                    htmlstr += attribute + " " + \
-                        article_noblanks[attribute].strip() + ", "
-            if "note" in article_noblanks:
-                htmlstr += article_noblanks["note"].strip() + ", "
-            htmlstr += article_noblanks["year"].strip() + "."
-            formatted_articles.append(htmlstr.strip())
-        return [replace_special(article) for article in formatted_articles]
-    elif output == "bibtex":
-        # format each article in BibTeX format
-        for article in articles:
-            article_noblanks = remove_blanks(article)
-            bibtexstr = format_author_title(article_noblanks, "article")
-            bibtexstr += "  journal = {" + \
-                article_noblanks["journal"].strip() + "},\n"
-            attributes = ["volume", "number", "pages"]
-            for attribute in attributes:
-                if attribute in article_noblanks:
-                    bibtexstr += "  " + attribute + " = {" + \
-                        article_noblanks[attribute].strip() + "},\n"
-            bibtexstr += "  year = {" + article_noblanks["year"].strip() + \
-                "},\n"
-            if "url" in article_noblanks:
-                bibtexstr += "  note = {" + article_noblanks["url"].strip() + \
-                    "},\n"
-            bibtexstr += "}"
-            formatted_articles.append(bibtexstr.strip())
-        return formatted_articles
-    else:
-        raise ValueError("'output' must be either 'html' or 'bibtex'")
+    optional_attributes = ["volume", "number", "pages"]
+    for article in articles:
+        htmlstr = "".join([format_names(article["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(article)])
+        htmlstr = "".join([htmlstr, article["journal"], ", "])
+        for attribute in optional_attributes:
+            if attribute in article:
+                htmlstr = "".join([
+                        htmlstr, attribute, " ", article[attribute], ", "])
+        htmlstr = "".join([htmlstr, article["year"], "."])
+        formatted_articles.append(htmlstr.strip())
+    return map(replace_special, formatted_articles)
 
-def format_author_title(entry, entry_type):
+def format_books(books):
     r"""
-    Format the author's name and publication title in BibTeX format.
-
-    INPUT:
-
-    - entry -- a publication entry, e.g. article, book, thesis, etc.
-
-    - entry_type -- the BibTeX type of the given publication entry. The
-      supported BibTeX types are: article, book, incollection, inproceedings,
-      mastersthesis, misc, phdthesis, and unpublished.
-
-    OUTPUT:
-
-    For the given publication entry, format the author's name and the entry's
-    title in BibTeX format. The author's name and publication title are
-    preceded by the citation name.
-    """
-    bibtexstr = "@" + entry_type + "{" + \
-        bibtex_citation(entry["author"], entry["year"]) + ",\n"
-    bibtexstr += "  author = {" + entry["author"].strip() + "},\n"
-    bibtexstr += "  title = {" + entry["title"].strip() + "},\n"
-    return bibtexstr
-
-def format_books(books, output="html"):
-    r"""
-    Format each book in either HTML or BibTeX format.
+    Format each book in HTML format.
 
     INPUT:
 
@@ -382,242 +367,120 @@ def format_books(books, output="html"):
       Use the function format_unpublished() to format books that are
       unpublished. Each book is required to have the following mandatory
       attributes: author, title, publisher, and year. Optional attributes
-      include: edition and url.
-
-    - output -- (default: 'html') the format in which to output each
-      book. The supported output formats are:
-
-      - 'html' -- output each book in HTML format suitable for displaying
-        on websites.
-
-      - 'bibtex' -- output each book in BibTeX format suitable for
-        further processing using LaTeX.
+      include: edition and note.
 
     OUTPUT:
 
-    A list of books all of which are formatted in either HTML or BibTeX
-    format.
+    A list of books all of which are formatted in HTML suitable for
+    displaying on websites.
     """
     formatted_books = []
-    if output == "html":
-        # format each book in HTML format
-        for book in books:
-            book_noblanks = remove_blanks(book)
-            htmlstr = format_names(book_noblanks["author"]) + ". "
-            htmlstr += html_title(book_noblanks)
-            if "edition" in book_noblanks:
-                htmlstr += book_noblanks["edition"].strip() + " edition, "
-            htmlstr += book_noblanks["publisher"].strip() + ", "
-            htmlstr += book_noblanks["year"].strip() + "."
-            formatted_books.append(htmlstr.strip())
-        return [replace_special(book) for book in formatted_books]
-    elif output == "bibtex":
-        # format each book in BibTeX format
-        for book in books:
-            book_noblanks = remove_blanks(book)
-            bibtexstr = format_author_title(book_noblanks, "book")
-            if "edition" in book_noblanks:
-                bibtexstr += "  edition = {" + \
-                    book_noblanks["edition"].strip() + "},\n"
-            bibtexstr += "  publisher = {" + \
-                book_noblanks["publisher"].strip() + "},\n"
-            bibtexstr += "  year = {" + book_noblanks["year"].strip() + "},\n"
-            if "url" in book_noblanks:
-                bibtexstr += "  note = {" + book_noblanks["url"].strip() + \
-                    "},\n"
-            bibtexstr += "}"
-            formatted_books.append(bibtexstr.strip())
-        return formatted_books
-    else:
-        raise ValueError("'output' must be either 'html' or 'bibtex'")
+    for book in books:
+        htmlstr = "".join([format_names(book["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(book)])
+        if "edition" in book:
+            htmlstr = "".join([htmlstr, book["edition"], " edition, "])
+        htmlstr = "".join([
+                htmlstr,
+                book["publisher"], ", ",
+                book["year"], "."])
+        formatted_books.append(htmlstr.strip())
+    return map(replace_special, formatted_books)
 
-def format_collections(collections, output="html"):
+def format_collections(collections):
     r"""
-    Format each entry in a collection in either HTML or BibTeX format.
+    Format each entry in a collection in HTML format.
 
     INPUT:
 
     - collections -- a list of dictionaries of collection entries. This
       usually means a book chapter in a book. The mandatory attributes of
       an entry in a collection are: author, title, booktitle, and year.
-      Some optional attributes include: editor, pages, publisher, and url.
+      Some optional attributes include: editor, pages, publisher, and note.
       Each entry in the collection must be published work.
-
-    - output -- (default: 'html') the format in which to output each
-      collection entry. The supported output formats are:
-
-      - 'html' -- output each collection entry in HTML format suitable for
-        displaying on websites.
-
-      - 'bibtex' -- output each collection entry in BibTeX format suitable
-        for further processing using LaTeX.
 
     OUTPUT:
 
-    A list of collection entries all of which are formatted in either HTML
-    or BibTeX format.
+    A list of collection entries all of which are formatted in HTML
+    suitable for displaying on websites.
     """
     formatted_entries = []
-    if output == "html":
-        # format each collection entry in HTML format
-        for entry in collections:
-            entry_noblanks = remove_blanks(entry)
-            htmlstr = format_names(entry_noblanks["author"]) + ". "
-            htmlstr += html_title(entry_noblanks)
-            if "editor" in entry_noblanks:
-                htmlstr += "In " + \
-                    format_names(entry_noblanks["editor"]) + " (ed.). "
-            htmlstr += entry_noblanks["booktitle"].strip() + ". "
-            if "publisher" in entry_noblanks:
-                htmlstr += entry_noblanks["publisher"].strip() + ", "
-            if "pages" in entry_noblanks:
-                htmlstr += "pages " + entry_noblanks["pages"] + ", "
-            htmlstr += entry_noblanks["year"].strip() + "."
-            formatted_entries.append(htmlstr.strip())
-        return [replace_special(entry) for entry in formatted_entries]
-    elif output == "bibtex":
-        # format each collection entry in BibTeX format
-        for entry in collections:
-            entry_noblanks = remove_blanks(entry)
-            bibtexstr = format_author_title(entry_noblanks, "incollection")
-            if "editor" in entry_noblanks:
-                bibtexstr += "  editor = {" + \
-                    entry_noblanks["editor"].strip() + "},\n"
-            bibtexstr += "  booktitle = {" + \
-                entry_noblanks["booktitle"].strip() + "},\n"
-            if "publisher" in entry_noblanks:
-                bibtexstr += "  publisher = {" + \
-                    entry_noblanks["publisher"].strip() + "},\n"
-            if "pages" in entry_noblanks:
-                bibtexstr += "  pages = {" + \
-                    entry_noblanks["pages"].strip() + "},\n"
-            bibtexstr += "  year = {" + entry_noblanks["year"].strip() + "},\n"
-            if "url" in entry_noblanks:
-                bibtexstr += "  note = {" + entry_noblanks["url"].strip() + \
-                    "},\n"
-            bibtexstr += "}"
-            formatted_entries.append(bibtexstr.strip())
-        return formatted_entries
-    else:
-        raise ValueError("'output' must be either 'html' or 'bibtex'")
+    for entry in collections:
+        htmlstr = "".join([format_names(entry["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(entry)])
+        if "editor" in entry:
+            htmlstr = "".join([
+                    htmlstr, "In ", format_names(entry["editor"]), " (ed.). "])
+        htmlstr = "".join([htmlstr, entry["booktitle"], ". "])
+        if "publisher" in entry:
+            htmlstr = "".join([htmlstr, entry["publisher"], ", "])
+        if "pages" in entry:
+            htmlstr = "".join([htmlstr, "pages ", entry["pages"], ", "])
+        htmlstr = "".join([htmlstr, entry["year"], "."])
+        formatted_entries.append(htmlstr.strip())
+    return map(replace_special, formatted_entries)
 
-def format_masterstheses(masterstheses, output="html"):
+def format_masterstheses(masterstheses):
     r"""
-    Format each Master's thesis in either HTML or BibTeX format.
+    Format each Master's thesis in HTML format.
 
     INPUT:
 
     - masterstheses -- a list of dictionaries of Master's theses. Each
       Master's thesis has the following mandatory attributes: author, title,
-      school, and year. Some optional attributes include: address and url.
-
-    - output -- (default: 'html') the format in which to output each
-      Master's thesis. The supported output formats are:
-
-      - 'html' -- output each Master's thesis in HTML format suitable for
-        displaying on websites.
-
-      - 'bibtex' -- output each Master's thesis in BibTeX format suitable
-        for further processing using LaTeX.
+      school, and year. Some optional attributes include: address and note.
 
     OUTPUT:
 
-    A list of Master's theses all of which are formatted in either HTML
-    or BibTeX format.
+    A list of Master's theses all of which are formatted in HTML
+    suitable for displaying on websites.
     """
     formatted_theses = []
-    if output == "html":
-        # format each thesis in HTML format
-        for thesis in masterstheses:
-            thesis_noblanks = remove_blanks(thesis)
-            htmlstr = format_names(thesis_noblanks["author"]) + ". "
-            htmlstr += html_title(thesis_noblanks)
-            htmlstr += thesis_noblanks["school"].strip() + ", "
-            if "address" in thesis_noblanks:
-                htmlstr += thesis_noblanks["address"].strip() + ", "
-            htmlstr += thesis_noblanks["year"].strip() + "."
-            formatted_theses.append(htmlstr.strip())
-        return [replace_special(thesis) for thesis in formatted_theses]
-    elif output == "bibtex":
-        # format each thesis in BibTeX format
-        for thesis in masterstheses:
-            thesis_noblanks = remove_blanks(thesis)
-            bibtexstr = format_author_title(thesis_noblanks, "mastersthesis")
-            bibtexstr += "  school = {" + thesis_noblanks["school"].strip() + \
-                "},\n"
-            if "address" in thesis_noblanks:
-                bibtexstr += "  address = {" + \
-                    thesis_noblanks["address"].strip() + "},\n"
-            bibtexstr += "  year = {" + thesis_noblanks["year"].strip() + \
-                "},\n"
-            if "url" in thesis_noblanks:
-                bibtexstr += "  note = {" + thesis_noblanks["url"].strip() + \
-                    "},\n"
-            formatted_theses.append(bibtexstr.strip())
-        return formatted_theses
-    else:
-        raise ValueError("'output' must be either 'html' or 'bibtex'")
+    for thesis in masterstheses:
+        htmlstr = "".join([format_names(thesis["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(thesis)])
+        htmlstr = "".join([htmlstr, thesis["school"], ", "])
+        if "address" in thesis:
+            htmlstr = "".join([htmlstr, thesis["address"], ", "])
+        htmlstr = "".join([htmlstr, thesis["year"], "."])
+        formatted_theses.append(htmlstr.strip())
+    return map(replace_special, formatted_theses)
 
-def format_misc(misc, output="html"):
+def format_miscs(miscs, thesis=False):
     r"""
-    Format each miscellaneous entry in either HTML or BibTeX format. Here,
-    a miscellaneous entry is usually a preprint.
+    Format each miscellaneous entry in HTML format. Here, a miscellaneous
+    entry is usually a preprint.
 
     INPUT:
 
-    - misc -- a list of dictionaries of miscellaneous entries. There are no
+    - miscs -- a list of dictionaries of miscellaneous entries. There are no
       mandatory attributes. The supported optional attributes are: author,
-      title, howpublished, year, note, and url. However, it is reasonable
-      to expect that at least the following attributes are given specific
+      title, howpublished, year, and note. However, it is reasonable to
+      expect that at least the following attributes are given specific
       values: author, title, and year.
 
-    - output -- (default: 'html') the format in which to output each
-      miscellaneous entry. The supported output formats are:
-
-      - 'html' -- output each miscellaneous entry in HTML format suitable for
-        displaying on websites.
-
-      - 'bibtex' -- output each miscellaneous entry in BibTeX format suitable
-        for further processing using LaTeX.
+    - thesis -- (default: False) True if miscs only contains undergraduate
+      theses; False otherwise. If False, then miscs is assumed to only
+      contain preprints.
 
     OUTPUT:
 
-    A list of miscellaneous entries all of which are formatted in either HTML
-    or BibTeX format.
+    A list of miscellaneous entries all of which are formatted in HTML
+    suitable for displaying on websites.
     """
     formatted_miscs = []
-    if output == "html":
-        # format each miscellaneous entry in HTML format
-        for entry in misc:
-            entry_noblanks = remove_blanks(entry)
-            htmlstr = format_names(entry_noblanks["author"]) + ". "
-            htmlstr += html_title(entry_noblanks)
-            attributes = ["howpublished", "note"]
-            for attribute in attributes:
-                if attribute in entry_noblanks:
-                    htmlstr += entry_noblanks[attribute].strip() + ", "
-            htmlstr += entry_noblanks["year"].strip() + "."
-            formatted_miscs.append(htmlstr.strip())
-        return [replace_special(entry) for entry in formatted_miscs]
-    elif output == "bibtex":
-        # format each miscellaneous entry in BibTeX format
-        for entry in misc:
-            entry_noblanks = remove_blanks(entry)
-            bibtexstr = format_author_title(entry_noblanks, "misc")
-            attributes = ["howpublished", "note"]
-            for attribute in attributes:
-                if attribute in entry_noblanks:
-                    bibtexstr += "  " + attribute + " = {" + \
-                        entry_noblanks[attribute].strip() + "},\n"
-            bibtexstr += "  year = {" + entry_noblanks["year"].strip() + "},\n"
-            if "url" in entry_noblanks:
-                bibtexstr += "  note = {" + entry_noblanks["url"].strip() + \
-                    "},\n"
-            bibtexstr += "}"
-            formatted_miscs.append(bibtexstr.strip())
-        return formatted_miscs
-    else:
-        raise ValueError("'output' must be either 'html' or 'bibtex'")
+    for entry in miscs:
+        htmlstr = "".join([format_names(entry["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(entry)])
+        if "howpublished" in entry:
+            htmlstr = "".join([htmlstr, entry["howpublished"], ", "])
+        if thesis:
+            note = entry["note"]
+            note = note[note.find(" "):].strip()
+            htmlstr = "".join([htmlstr, note, ", "])
+        htmlstr = "".join([htmlstr, entry["year"], "."])
+        formatted_miscs.append(htmlstr.strip())
+    return map(replace_special, formatted_miscs)
 
 def format_names(names):
     r"""
@@ -626,9 +489,7 @@ def format_names(names):
 
     INPUT:
 
-    - names -- a string of author names, each name separated by 'and' just
-      as author names are separated in BibTeX format. The argument names
-      is assumed to contain at least one author name.
+    - names -- a list of names.
 
     OUTPUT:
 
@@ -647,198 +508,100 @@ def format_names(names):
             formatted_names[i] = "".join([formatted_names[i], ", "])
         return "".join(formatted_names)
 
-def format_phdtheses(phdtheses, output="html"):
+def format_phdtheses(phdtheses):
     r"""
-    Format each PhD thesis in either HTML or BibTeX format.
+    Format each PhD thesis in HTML format.
 
     INPUT:
 
     - phdtheses -- a list of dictionaries of PhD theses. The mandatory
       attributes of a PhD thesis are: author, title, school, and year.
-      Some optional attributes include: address and url.
-
-    - output -- (default: 'html') the format in which to output each
-      PhD thesis. The supported output formats are:
-
-      - 'html' -- output each PhD thesis in HTML format suitable for
-        displaying on websites.
-
-      - 'bibtex' -- output each PhD thesis in BibTeX format suitable
-        for further processing using LaTeX.
+      Some optional attributes include: address and note.
 
     OUTPUT:
 
-    A list of PhD theses all of which are formatted in either HTML
-    or BibTeX format.
+    A list of PhD theses all of which are formatted in HTML
+    suitable for displaying on websites.
     """
     formatted_theses = []
-    if output == "html":
-        # format each PhD thesis in HTML format
-        for thesis in phdtheses:
-            thesis_noblanks = remove_blanks(thesis)
-            htmlstr = format_names(thesis_noblanks["author"]) + ". "
-            htmlstr += html_title(thesis_noblanks)
-            htmlstr += thesis_noblanks["school"].strip() + ", "
-            if "address" in thesis_noblanks:
-                htmlstr += thesis_noblanks["address"].strip() + ", "
-            htmlstr += thesis_noblanks["year"].strip() + "."
-            formatted_theses.append(htmlstr.strip())
-        return [replace_special(thesis) for thesis in formatted_theses]
-    elif output == "bibtex":
-        # format each PhD thesis in BibTeX format
-        for thesis in phdtheses:
-            thesis_noblanks = remove_blanks(thesis)
-            bibtexstr = format_author_title(thesis_noblanks, "phdthesis")
-            bibtexstr += "  school = {" + thesis_noblanks["school"].strip() + \
-                "},\n"
-            if "address" in thesis_noblanks:
-                bibtexstr += "  address = {" + \
-                    thesis_noblanks["address"].strip() + "},\n"
-            bibtexstr += "  year = {" + thesis_noblanks["year"].strip() + \
-                "},\n"
-            if "url" in thesis_noblanks:
-                bibtexstr += "  note = {" + thesis_noblanks["url"].strip() + \
-                    "},\n"
-            bibtexstr += "}"
-            formatted_theses.append(bibtexstr.strip())
-        return formatted_theses
-    else:
-        raise ValueError("'output' must be either 'html' or 'bibtex'")
+    for thesis in phdtheses:
+        htmlstr = "".join([format_names(thesis["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(thesis)])
+        htmlstr = "".join([htmlstr, thesis["school"], ", "])
+        if "address" in thesis:
+            htmlstr = "".join([htmlstr, thesis["address"], ", "])
+        htmlstr = "".join([htmlstr, thesis["year"], "."])
+        formatted_theses.append(htmlstr.strip())
+    return map(replace_special, formatted_theses)
 
-def format_proceedings(proceedings, output="html"):
+def format_proceedings(proceedings):
     r"""
-    Format each proceedings article in either HTML or BibTeX format.
+    Format each proceedings article in HTML format.
 
     INPUT:
 
     - proceedings -- a list of dictionaries of proceedings articles. The
       mandatory attributes are: author, title, booktitle, and year. Some
       optional attributes include: editor, publisher, series, volume, pages,
-      note, and url.
-
-    - output -- (default: 'html') the format in which to output each
-      proceedings article. The supported output formats are:
-
-      - 'html' -- output each proceedings article in HTML format suitable for
-        displaying on websites.
-
-      - 'bibtex' -- output each proceedings article in BibTeX format suitable
-        for further processing using LaTeX.
+      and note.
 
     OUTPUT:
 
-    A list of proceedings articles all of which are formatted in either HTML
-    or BibTeX format.
+    A list of proceedings articles all of which are formatted in HTML
+    suitable for displaying on websites.
     """
     formatted_proceedings = []
-    if output == "html":
-        # format each proceedings article in HTML format
-        for article in proceedings:
-            article_noblanks = remove_blanks(article)
-            htmlstr = format_names(article_noblanks["author"]) + ". "
-            htmlstr += html_title(article_noblanks)
-            if "editor" in article_noblanks:
-                htmlstr += "In " + format_names(article_noblanks["editor"]) + \
-                    " (ed.). "
-            htmlstr += article_noblanks["booktitle"].strip() + ". "
-            if "publisher" in article_noblanks:
-                htmlstr += article_noblanks["publisher"].strip() + ", "
-            if "series" in article_noblanks:
-                htmlstr += article_noblanks["series"].strip() + ", "
-            attributes = ["volume", "pages"]
-            for attribute in attributes:
-                if attribute in article_noblanks:
-                    htmlstr += attribute + " " + \
-                        article_noblanks[attribute] + ", "
-            if "note" in article_noblanks:
-                htmlstr += article_noblanks["note"].strip() + ", "
-            htmlstr += article_noblanks["year"].strip() + "."
-            formatted_proceedings.append(htmlstr.strip())
-        return [replace_special(article) for article in formatted_proceedings]
-    elif output == "bibtex":
-        # format each proceedings article in BibTeX format
-        for article in proceedings:
-            article_noblanks = remove_blanks(article)
-            bibtexstr = format_author_title(article_noblanks, "inproceedings")
-            if "editor" in article_noblanks:
-                bibtexstr += "  editor = {" + \
-                    article_noblanks["editor"].strip() + "},\n"
-            bibtexstr += "  booktitle = {" + \
-                article_noblanks["booktitle"].strip() + "},\n"
-            attributes = ["publisher", "series", "volume", "pages"]
-            for attribute in attributes:
-                if attribute in article_noblanks:
-                    bibtexstr += "  " + attribute + " = {" + \
-                        article_noblanks[attribute].strip() + "},\n"
-            if "url" in article_noblanks:
-                bibtexstr += "  note = {" + \
-                    article_noblanks["url"].strip() + "},\n"
-            bibtexstr += "  year = {" + article_noblanks["year"].strip() + \
-                "},\n"
-            bibtexstr += "}"
-            formatted_proceedings.append(bibtexstr.strip())
-        return formatted_proceedings
-    else:
-        raise ValueError("'output' must be either 'html' or 'bibtex'")
+    for article in proceedings:
+        htmlstr = "".join([format_names(article["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(article)])
+        if "editor" in article:
+            htmlstr = "".join([
+                    htmlstr,
+                    "In ", format_names(article["editor"]), " (ed.). "])
+        htmlstr = "".join([htmlstr, article["booktitle"], ". "])
+        if "publisher" in article:
+            htmlstr = "".join([htmlstr, article["publisher"], ", "])
+        if "series" in article:
+            htmlstr = "".join([htmlstr, article["series"], ", "])
+        if "volume" in article:
+            htmlstr = "".join([
+                    htmlstr, "volume ", article["volume"], ", "])
+        if "pages" in article:
+            if htmlstr.strip()[-1] == ".":
+                htmlstr = "".join([
+                        htmlstr, "Pages ", article["pages"], ", "])
+            else:
+                htmlstr = "".join([
+                        htmlstr, "pages ", article["pages"], ", "])
+        htmlstr = "".join([htmlstr, article["year"], "."])
+        formatted_proceedings.append(htmlstr.strip())
+    return map(replace_special, formatted_proceedings)
 
-def format_unpublished(unpublished, output="html"):
+def format_unpublisheds(unpublisheds):
     r"""
-    Format each unpublished entry in either HTML or BibTeX format.
+    Format each unpublished entry in HTML format.
 
     INPUT:
 
-    - unpublished -- a list of dictionaries of unpublished entries. An
+    - unpublisheds -- a list of dictionaries of unpublished entries. An
       unpublished entry is required to have the following mandatory
       attributes: author, title, and year. Optional attributes include:
-      month, note, and url.
-
-    - output -- (default: 'html') the format in which to output each
-      unpublished entry. The supported output formats are:
-
-      - 'html' -- output each unpublished entry in HTML format suitable for
-        displaying on websites.
-
-      - 'bibtex' -- output each unpublished entry in BibTeX format suitable
-        for further processing using LaTeX.
+      month and note.
 
     OUTPUT:
 
-    A list of unpublished entries all of which are formatted in either HTML
-    or BibTeX format.
+    A list of unpublished entries all of which are formatted in HTML
+    suitable for displaying on websites.
     """
     formatted_entries = []
-    if output == "html":
-        # format each entry in HTML format
-        for entry in unpublished:
-            entry_noblanks = remove_blanks(entry)
-            htmlstr = format_names(entry_noblanks["author"]) + ". "
-            htmlstr += html_title(entry_noblanks)
-            attributes = ["note", "month"]
-            for attribute in attributes:
-                if attribute in entry_noblanks:
-                    htmlstr += entry_noblanks[attribute].strip() + ", "
-            htmlstr += entry_noblanks["year"].strip() + "."
-            formatted_entries.append(htmlstr.strip())
-        return [replace_special(entry) for entry in formatted_entries]
-    elif output == "bibtex":
-        # format each entry in BibTeX format
-        for entry in unpublished:
-            entry_noblanks = remove_blanks(entry)
-            bibtexstr = format_author_title(entry_noblanks, "unpublished")
-            attributes = ["note", "month"]
-            for attribute in attributes:
-                if attribute in entry_noblanks:
-                    bibtexstr += "  " + attribute + " = {" + \
-                        entry_noblanks[attribute].strip() + "},\n"
-            bibtexstr += "  year = {" + entry_noblanks["year"].strip() + "},\n"
-            if "url" in entry_noblanks:
-                bibtexstr += "  note = {" + entry_noblanks["url"].strip() + \
-                    "},\n"
-            bibtexstr += "}"
-            formatted_entries.append(bibtexstr.strip())
-        return formatted_entries
-    else:
-        raise ValueError("'output' must be either 'html' or 'bibtex'")
+    for entry in unpublisheds:
+        htmlstr = "".join([format_names(entry["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(entry)])
+        if "month" in entry:
+            htmlstr = "".join([htmlstr, entry["month"], ", "])
+        htmlstr = "".join([htmlstr, entry["year"], "."])
+        formatted_entries.append(htmlstr.strip())
+    return map(replace_special, formatted_entries)
 
 def html_title(publication):
     r"""
@@ -854,16 +617,18 @@ def html_title(publication):
     OUTPUT:
 
     If possible, format the title of the given publication as a hyperlink.
+    Here, it is assumed that the BibTeX attribute 'note' (if present)
+    contains a valid URL.
     """
     url = ""
-    if "url" in publication:
-        url = publication["url"].strip()
+    if "note" in publication:
+        url = publication["note"].split()[0]
         url = replace_special_url(url)
-    title = publication["title"].strip()
+    title = publication["title"]
     if url != "":
-        return "<a href=\"" + url + "\">" + title + "</a>" + ". "
+        return "".join(["<a href=\"", url, "\">", title, "</a>", ". "])
     else:
-        return title + ". "
+        return "".join([title, ". "])
 
 def output_html(publications, filename):
     r"""
@@ -881,27 +646,19 @@ def output_html(publications, filename):
     OUTPUT:
 
     Output the HTML formatted publication entries to the file named by
-    filename.
+    filename. We are overwriting the content of this file.
     """
-    # for regular expressions
-    import re
-    output_bibtex(publications, bibtex_filename)
     # format the various lists of publications in HTML format
-    articles = format_articles(publications["articles"], output="html")
-    collections = format_collections(publications["incollections"],
-                                     output="html")
-    proceedings = format_proceedings(publications["inproceedings"],
-                                     output="html")
-    masterstheses = format_masterstheses(publications["masterstheses"],
-                                         output="html")
-    phdtheses = format_phdtheses(publications["phdtheses"], output="html")
-    books = format_books(publications["books"], output="html")
-    unpublisheds = format_unpublished(publications["unpublisheds"],
-                                      output="html")
+    articles = format_articles(publications["articles"])
+    collections = format_collections(publications["incollections"])
+    proceedings = format_proceedings(publications["inproceedings"])
+    masterstheses = format_masterstheses(publications["masterstheses"])
+    phdtheses = format_phdtheses(publications["phdtheses"])
+    books = format_books(publications["books"])
+    unpublisheds = format_unpublisheds(publications["unpublisheds"])
     miscs = filter_undergraduate_theses(publications["miscs"])
-    preprints = format_misc(miscs["preprints"], output="html")
-    undergraduate_theses = format_misc(miscs["undergraduatetheses"],
-                                       output="html")
+    preprints = format_miscs(miscs["preprints"])
+    undergradtheses = format_miscs(miscs["undergraduatetheses"], thesis=True)
     FOUR_SPACES = "    "
     # compiled regular expressions to speed up searches
     re_start_articles = re.compile(r"START_TOKEN_ARTICLES")
@@ -918,10 +675,10 @@ def output_html(publications, filename):
     line = htmlfile.readline()
     # get everything before the section that lists the articles
     while not re_start_articles.search(line):
-        htmlcontent += line
+        htmlcontent = "".join([htmlcontent, line])
         line = htmlfile.readline()
     # include the stub that delimits the beginning of the list of articles
-    htmlcontent += line + "\n"
+    htmlcontent = "".join([htmlcontent, line, "\n"])
     # Ignore everthing between the start of the list of articles and the
     # end of that list. We do this because we want to insert a new list
     # of articles in between the stubs that delimit the start and end of
@@ -931,21 +688,23 @@ def output_html(publications, filename):
     # Sort the publication items. Journal articles, items in collections,
     # and proceedings papers are grouped in one section. Sort these.
     papers = articles + collections + proceedings
-    sorted_index = sort_publications(publications["articles"] +
-                                     publications["incollections"] +
-                                     publications["inproceedings"])
+    sorted_index = sort_publications(
+        publications["articles"] +
+        publications["incollections"] +
+        publications["inproceedings"])
     # insert the new list of articles
-    htmlcontent += "  <ol>\n"
+    htmlcontent = "".join([htmlcontent, "  <ol>\n"])
     for index in sorted_index:
-        htmlcontent += FOUR_SPACES + "<li>" + papers[index] + "</li>\n"
-    htmlcontent += "  </ol>\n\n"
+        htmlcontent = "".join([
+                htmlcontent, FOUR_SPACES, "<li>", papers[index], "</li>\n"])
+    htmlcontent = "".join([htmlcontent, "  </ol>\n\n"])
     # Get everything before the section that lists the theses. This also
     # include the stub that delimits the end of the list of articles.
     while not re_start_theses.search(line):
-        htmlcontent += line
+        htmlcontent = "".join([htmlcontent, line])
         line = htmlfile.readline()
     # include the stub that delimits the beginning of the list of theses
-    htmlcontent += line + "\n"
+    htmlcontent = "".join([htmlcontent, line, "\n"])
     # Ignore everything between the start of the list of theses and the
     # end of that list. We do this because we want to insert a new list
     # of theses in between the stubs that delimit the start and end of
@@ -954,22 +713,24 @@ def output_html(publications, filename):
         line = htmlfile.readline()
     # Sort the list of theses. These include PhD, Master's, and undergraduate
     # theses.
-    theses = masterstheses + phdtheses + undergraduate_theses
-    sorted_index = sort_publications(publications["masterstheses"] +
-                                     publications["phdtheses"] +
-                                     miscs["undergraduatetheses"])
+    theses = masterstheses + phdtheses + undergradtheses
+    sorted_index = sort_publications(
+        publications["masterstheses"] +
+        publications["phdtheses"] +
+        miscs["undergraduatetheses"])
     # insert the new list of theses
-    htmlcontent += "  <ol>\n"
+    htmlcontent = "".join([htmlcontent, "  <ol>\n"])
     for index in sorted_index:
-        htmlcontent += FOUR_SPACES + "<li>" + theses[index] + "</li>\n"
-    htmlcontent += "  </ol>\n\n"
+        htmlcontent = "".join([
+                htmlcontent, FOUR_SPACES, "<li>", theses[index], "</li>\n"])
+    htmlcontent = "".join([htmlcontent, "  </ol>\n\n"])
     # Get everything before the section that lists the books. This also
     # include the stub that delimits the end of the list of theses.
     while not re_start_books.search(line):
-        htmlcontent += line
+        htmlcontent = "".join([htmlcontent, line])
         line = htmlfile.readline()
     # include the stub that delimits the beginning of the list of books
-    htmlcontent += line + "\n"
+    htmlcontent = "".join([htmlcontent, line, "\n"])
     # Ignore everything between the start of the list of books and the
     # end of that list. We do this because we want to insert a new list
     # of books in between the stubs that delimit the start and end of
@@ -979,20 +740,23 @@ def output_html(publications, filename):
     # Sort the list of books. These include both published books and
     # unpublished manuscripts.
     books_list = books + unpublisheds
-    sorted_index = sort_publications(publications["books"] +
-                                     publications["unpublisheds"])
+    sorted_index = sort_publications(
+        publications["books"] +
+        publications["unpublisheds"])
     # insert the new list of books
-    htmlcontent += "  <ol>\n"
+    htmlcontent = "".join([htmlcontent, "  <ol>\n"])
     for index in sorted_index:
-        htmlcontent += FOUR_SPACES + "<li>" + books_list[index] + "</li>\n"
-    htmlcontent += "  </ol>\n\n"
+        htmlcontent = "".join([
+                htmlcontent,
+                FOUR_SPACES, "<li>", books_list[index], "</li>\n"])
+    htmlcontent = "".join([htmlcontent, "  </ol>\n\n"])
     # Get everything before the section that lists the preprints. This also
     # include the stub that delimits the end of the list of books.
     while not re_start_preprints.search(line):
-        htmlcontent += line
+        htmlcontent = "".join([htmlcontent, line])
         line = htmlfile.readline()
     # include the stub that delimits the beginning of the list of preprints
-    htmlcontent += line + "\n"
+    htmlcontent = "".join([htmlcontent, line, "\n"])
     # Ignore everything between the start of the list of preprints and the
     # end of that list. We do this because we want to insert a new list
     # of preprints in between the stubs that delimit the start and end of
@@ -1002,17 +766,18 @@ def output_html(publications, filename):
     # Sort the list of preprints.
     sorted_index = sort_publications(miscs["preprints"])
     # insert the new list of preprints
-    htmlcontent += "  <ol>\n"
+    htmlcontent = "".join([htmlcontent, "  <ol>\n"])
     for index in sorted_index:
-        htmlcontent += FOUR_SPACES + "<li>" + preprints[index] + "</li>\n"
-    htmlcontent += "  </ol>\n\n"
+        htmlcontent = "".join([
+                htmlcontent, FOUR_SPACES, "<li>", preprints[index], "</li>\n"])
+    htmlcontent = "".join([htmlcontent, "  </ol>\n\n"])
     # Get everything from here to the end of the file. This also include the
     # stub that delimits the end of the list of preprints.
     try:
         # When the end of the file is reached, this will raise a StopIteration
         # exception.
         while True:
-            htmlcontent += line
+            htmlcontent = "".join([htmlcontent, line])
             line = htmlfile.next()
     except StopIteration:
         # We have reached the end of the file. We don't need to do
@@ -1027,67 +792,7 @@ def output_html(publications, filename):
     outfile.write(htmlcontent)
     outfile.close()
     if CHANGE_PERMISSIONS:
-        import os
         os.system("chmod " + PERMISSIONS + " " + filename)
-
-def output_bibtex(publications, filename):
-    r"""
-    Format each publication entry in BibTeX format, and output the resulting
-    BibTeX formatted entries to a text file.
-
-    INPUT:
-
-    - publications -- a list of publication entries.
-
-    - filename -- the name of a file.
-
-    OUTPUT:
-
-    Output the BibTeX formatted publication entries to the file named by
-    filename.
-    """
-    from datetime import date
-    articles = format_articles(publications["articles"], output="bibtex")
-    collections = format_collections(publications["incollections"],
-                                     output="bibtex")
-    proceedings = format_proceedings(publications["inproceedings"],
-                                     output="bibtex")
-    masterstheses = format_masterstheses(publications["masterstheses"],
-                                         output="bibtex")
-    phdtheses = format_phdtheses(publications["phdtheses"], output="bibtex")
-    books = format_books(publications["books"], output="bibtex")
-    unpublisheds = format_unpublished(publications["unpublisheds"],
-                                      output="bibtex")
-    miscs = format_misc(publications["miscs"], output="bibtex")
-    bibliography = "% $Publications citing Sage $\n" + \
-        "% $Last updated: " + date.isoformat(date.today()) + " $\n\n" + \
-        "--- articles ----------------------------------------\n\n"
-    for article in articles:
-        bibliography += article + "\n\n"
-    bibliography += "--- collections ----------------------------------------\n\n"
-    for item in collections:
-        bibliography += item + "\n\n"
-    bibliography += "--- proceedings ----------------------------------------\n\n"
-    for item in proceedings:
-        bibliography += item + "\n\n"
-    bibliography += "--- Master's theses ----------------------------------------\n\n"
-    for thesis in masterstheses:
-        bibliography += thesis + "\n\n"
-    bibliography += "--- PhD theses ----------------------------------------\n\n"
-    for thesis in phdtheses:
-        bibliography += thesis + "\n\n"
-    bibliography += "--- books ----------------------------------------\n\n"
-    for book in books:
-        bibliography += book + "\n\n"
-    bibliography += "--- unpublished manuscripts ----------------------------------------\n\n"
-    for item in unpublisheds:
-        bibliography += item + "\n\n"
-    bibliography += "--- preprints ----------------------------------------\n\n"
-    for item in miscs:
-        bibliography += item + "\n\n"
-    outfile = open(filename, "w")
-    outfile.write(bibliography)
-    outfile.close()
 
 def process_database(dbfilename):
     r"""
@@ -1096,26 +801,34 @@ def process_database(dbfilename):
     INPUT:
 
     - dbfilename -- the name of the publications database file to process.
+      This is a BibTeX database.
 
     OUTPUT:
 
-    An 8-tuple of processed publication entries. The number eight corresponds
-    to the number of publication entries considered in this script. If other
-    types of publication are added to the database besides the type already
-    listed above, then the new publication type should be specified in the
-    block above. The 8-tuple output by this function is of the form
+    An 8-key dictionary of processed publication entries. The number eight
+    corresponds to the number of publication entries considered in this
+    script. If other types of publication are added to the database besides
+    the type already listed above, then the new publication type should be
+    specified in the block above. The 8-key dictionary output by this
+    function is of the form
 
-    (article, book, incollection, inproceedings, mastersthesis, misc,
-     phdthesis, unpublished)
+    {'articles': articles,
+     'books': books,
+     'incollections': incollections,
+     'inproceedings': inproceedings,
+     'masterstheses': masterstheses,
+     'miscs': miscs,
+     'phdtheses': phdtheses,
+     'unpublisheds': unpublisheds}
 
-    where each element in the tuple is a list of processed publication
-    entries. Each list is a dictionaries of publications of the same type. For
-    example, the tuple element 'article' is a list of dictionaries of
-    articles. Similarly, the tuple element 'book' is a list of dictionaries
-    of books.
+    where each value (corresponding to a key) in the dictionary is a list of
+    processed publication entries. Each list is a dictionary of publications
+    of the same type. For example, the dictionary value 'article' is a list
+    of dictionaries of articles. Similarly, the dictionary value 'book' is a
+    list of dictionaries of books.
     """
-    # Lists of dictionaries of publication entries. Each list contains a
-    # number of dictionaries of publication entries of the same type.
+    # Lists of dictionaries of publication entries. Each list contains
+    # several dictionaries of publication entries of the same type.
     articles = []
     books = []
     incollections = []
@@ -1124,85 +837,29 @@ def process_database(dbfilename):
     miscs = []
     phdtheses = []
     unpublisheds = []
-    # some useful constants
-    ARTICLE_ATT_LENGTH = len(article_attributes)
-    BOOK_ATT_LENGTH = len(book_attributes)
-    INCOLLECTION_ATT_LENGTH = len(incollection_attributes)
-    INPROCEEDINGS_ATT_LENGTH = len(inproceedings_attributes)
-    MASTERSTHESIS_ATT_LENGTH = len(mastersthesis_attributes)
-    MISC_ATT_LENGTH = len(misc_attributes)
-    PHDTHESIS_ATT_LENGTH = len(phdthesis_attributes)
-    UNPUBLISHED_ATT_LENGTH = len(unpublished_attributes)
-    # read in the file containing the database of publication entries
-    dbfile = open(dbfilename, "r")
-    try:
-        # Process the whole database using the next() function. This will
-        # raise a StopIteration exception once it reaches the end of the
-        # database file.
-        while True:
-            line = dbfile.next().strip()
-            if line == "article":
-                # process article entry
-                article_dict = {}
-                for i in xrange(ARTICLE_ATT_LENGTH):
-                    article_dict.setdefault(
-                        article_attributes[i], dbfile.next().strip())
-                articles.append(article_dict)
-            elif line == "book":
-                # process book entry
-                book_dict = {}
-                for i in xrange(BOOK_ATT_LENGTH):
-                    book_dict.setdefault(
-                        book_attributes[i], dbfile.next().strip())
-                books.append(book_dict)
-            elif line == "incollection":
-                # process incollection entry
-                incollection_dict = {}
-                for i in xrange(INCOLLECTION_ATT_LENGTH):
-                    incollection_dict.setdefault(
-                        incollection_attributes[i], dbfile.next().strip())
-                incollections.append(incollection_dict)
-            elif line == "inproceedings":
-                # process inproceedings entry
-                inproceedings_dict = {}
-                for i in xrange(INPROCEEDINGS_ATT_LENGTH):
-                    inproceedings_dict.setdefault(
-                        inproceedings_attributes[i], dbfile.next().strip())
-                inproceedings.append(inproceedings_dict)
-            elif line == "mastersthesis":
-                # process Master's thesis entry
-                mastersthesis_dict = {}
-                for i in xrange(MASTERSTHESIS_ATT_LENGTH):
-                    mastersthesis_dict.setdefault(
-                        mastersthesis_attributes[i], dbfile.next().strip())
-                masterstheses.append(mastersthesis_dict)
-            elif line == "misc":
-                # process miscellaneous entry
-                misc_dict = {}
-                for i in xrange(MISC_ATT_LENGTH):
-                    misc_dict.setdefault(
-                        misc_attributes[i], dbfile.next().strip())
-                miscs.append(misc_dict)
-            elif line == "phdthesis":
-                # process PhD thesis entry
-                phdthesis_dict = {}
-                for i in xrange(PHDTHESIS_ATT_LENGTH):
-                    phdthesis_dict.setdefault(
-                        phdthesis_attributes[i], dbfile.next().strip())
-                phdtheses.append(phdthesis_dict)
-            elif line == "unpublished":
-                # process unpublished entry
-                unpublished_dict = {}
-                for i in xrange(UNPUBLISHED_ATT_LENGTH):
-                    unpublished_dict.setdefault(
-                        unpublished_attributes[i], dbfile.next().strip())
-                unpublisheds.append(unpublished_dict)
-    except StopIteration:
-        # We have reached the end of the file. We don't need to do
-        # anything further, apart from closing the file.
-        pass
-    finally:
-        dbfile.close()
+    # parse the BibTeX database
+    parser = bibtex.Parser()
+    bibdb = parser.parse_file(dbfilename)
+    for key in bibdb.entries.keys():
+        if bibdb.entries[key].type == "article":
+            articles.append(extract_publication(bibdb.entries[key]))
+        elif bibdb.entries[key].type == "book":
+            books.append(extract_publication(bibdb.entries[key]))
+        elif bibdb.entries[key].type == "incollection":
+            incollections.append(extract_publication(bibdb.entries[key]))
+        elif bibdb.entries[key].type == "inproceedings":
+            inproceedings.append(extract_publication(bibdb.entries[key]))
+        elif bibdb.entries[key].type == "mastersthesis":
+            masterstheses.append(extract_publication(bibdb.entries[key]))
+        elif bibdb.entries[key].type == "misc":
+            miscs.append(extract_publication(bibdb.entries[key]))
+        elif bibdb.entries[key].type == "phdthesis":
+            phdtheses.append(extract_publication(bibdb.entries[key]))
+        elif bibdb.entries[key].type == "unpublished":
+            unpublisheds.append(extract_publication(bibdb.entries[key]))
+        else:
+            raise ValueError(
+                "Unsupported publication type %s" % bibdb.entries[key].type)
     return {"articles": articles,
             "books": books,
             "incollections": incollections,
@@ -1211,77 +868,6 @@ def process_database(dbfilename):
             "miscs": miscs,
             "phdtheses": phdtheses,
             "unpublisheds": unpublisheds}
-
-def remove_blanks(entry):
-    r"""
-    Remove all attributes from the publication entry that contain the value
-    '<BLANK>'.
-
-    INPUT:
-
-    - entry -- a dictionary containing attribute/value pairs that describe
-      a publication entry.
-
-    OUTPUT:
-
-    A dictionary containing attribute/value pairs that describes the same
-    publication entry as represented by 'entry'. However, all attributes with
-    the value '<BLANK>' are removed from this output dictionary.
-    """
-    # The author's name can be the same as the publisher's name. In that
-    # case, concatentate the author's name with the word "publisher" and
-    # set the result as the publisher's name. Such a work-around is needed
-    # since a dictionary can only have unique keys.
-    from copy import copy
-    copied_entry = copy(entry)
-    self_published = False
-    author = ""
-    publisher = ""
-    if "publisher" in copied_entry:
-        author = copied_entry["author"]
-        publisher = copied_entry["publisher"]
-        if author == publisher:
-            self_published = True
-            publisher = "".join([author, "publisher"])
-            copied_entry.update({"publisher": publisher})
-    # remove all but one 'blank' from the publication entry
-    processed_entry = dict(zip(copied_entry.values(), copied_entry.keys()))
-    # finally remove the last remaining 'blank'
-    try:
-        del processed_entry[BLANK]
-    except:
-        pass
-    processed_entry = dict(zip(processed_entry.values(),
-                               processed_entry.keys()))
-    # In case the author's name is the same as the publisher's name, now
-    # remove the extra string "publisher" at the end of the publisher's name.
-    if self_published:
-        publisher = publisher[:len(author)]
-        processed_entry.update({"publisher": publisher})
-    return processed_entry
-
-def remove_special(entry):
-    r"""
-    Remove each special character from the publication entry. The special
-    characters we consider usually include escape sequences specific to LaTeX.
-
-    INPUT:
-
-    - entry -- a dictionary containing attribute/value pairs that describe
-      a publication entry.
-
-    OUTPUT:
-
-    A dictionary containing attribute/value pairs that describes the same
-    publication entry as represented by 'entry'. However, all special
-    characters are removed.
-    """
-    from copy import copy
-    remove_targets = ["{", "\\", "'", "\"", "}"]
-    cleansed_entry = copy(entry)
-    for item in remove_targets:
-        cleansed_entry = cleansed_entry.replace(item, "")
-    return cleansed_entry
 
 def replace_special(entry):
     r"""
@@ -1300,18 +886,17 @@ def replace_special(entry):
     publication entry as represented by 'entry'. However, all special
     characters are replaced with equivalent characters.
     """
-    from copy import copy
-    replace_table = [("{\\\"a}", "&auml;"),
-                     ("{\\'a}", "&aacute;"),
-                     ("{\\\"e}", "&euml;"),
-                     ("{\\'e}", "&eacute;"),
-                     ("{\\'i}", "&iacute;"),
-                     ("{\\'o}", "&oacute;"),
-                     ("\\&", "&amp;"),
+    replace_table = [("{\\\"a}",   "&auml;"),
+                     ("{\\'a}",    "&aacute;"),
+                     ("{\\\"e}",   "&euml;"),
+                     ("{\\'e}",    "&eacute;"),
+                     ("{\\'i}",    "&iacute;"),
+                     ("{\\'o}",    "&oacute;"),
+                     ("\\&",       "&amp;"),
                      ("\\textsc{", ""),
-                     ("{", ""),
-                     ("}", "")]
-    cleansed_entry = copy(entry)
+                     ("{",         ""),
+                     ("}",         "")]
+    cleansed_entry = copy.copy(entry)
     for candidate, target in replace_table:
         cleansed_entry = cleansed_entry.replace(candidate, target)
     return cleansed_entry
@@ -1323,16 +908,15 @@ def replace_special_url(url):
 
     INPUT:
 
-    - url -- some URL.
+    - url -- a valid URL.
 
     OUTPUT:
 
     A URL equivalent to the given URL. However, all special characters are
     replaced with their equivalent HTML encoding.
     """
-    from copy import copy
     replace_table = [("&", "&amp;")]
-    cleansed_url = copy(url)
+    cleansed_url = copy.copy(url)
     for candidate, target in replace_table:
         cleansed_url = cleansed_url.replace(candidate, target)
     return cleansed_url
@@ -1418,8 +1002,9 @@ def sort_by_year(publications):
     items_dict = {}
     for year, item in sorted_years:
         if year in items_dict:
-            items_dict.setdefault(year,
-                                  items_dict[year].append(publications[item]))
+            items_dict.setdefault(
+                year,
+                items_dict[year].append(publications[item]))
         else:
             items_dict.setdefault(year, [publications[item]])
     return items_dict
@@ -1445,7 +1030,9 @@ def surname(name):
     first_author = author_names[0].split()
     return first_author[-1]
 
-### the main part #########################################################
+
+# ### the main part #########################################################
+
 
 # the driver section; this is where everything starts from
 if __name__ == "__main__":
