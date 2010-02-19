@@ -55,6 +55,8 @@ publications_combinat = os.path.join(PWD, "Sage-Combinat.bib")
 html_general = os.path.join(PWD, "library-publications.html")
 # the file containing the Sage-Combinat bibliography formatted in HTML
 html_combinat = os.path.join(PWD, "library-publications-combinat.html")
+# upstream version of the BibTeX database of Sage-Combinat
+bibtex_sage_combinat = "http://combinat.sagemath.org/hgwebdir.cgi/misc/raw-file/tip/articles/Sage-Combinat.bib"
 
 # Stuff relating to file permissions.
 # whether we should change the permissions of a file
@@ -158,6 +160,18 @@ PERMISSIONS = "755"
 # year
 # note
 #
+# The attributes that describe a technical report should be listed in
+# this order in the publications database.
+#
+# techreport
+# author
+# title
+# number
+# institution
+# address
+# year
+# note
+#
 # The attributes that describe an unpublished work should be listed in
 # this order in the publications database.
 #
@@ -254,6 +268,16 @@ def extract_publication(entry_dict):
      'school': <school-department-name>,
      'address': <institution-address>,
      'year': <completion-year>,
+     'note': <url>}
+
+    A technical report is represented using this dictionary:
+
+    {'author': <authors-name>,
+     'title': <report-title>,
+     'number': <report-number>,
+     'institution': <institution-name>,
+     'address': <institution-address>,
+     'year': <publication-year>,
      'note': <url>}
 
     An unpublished manuscript is represented using this dictionary:
@@ -534,6 +558,37 @@ def format_phdtheses(phdtheses):
         formatted_theses.append(htmlstr.strip())
     return map(replace_special, formatted_theses)
 
+def format_techreports(techreports):
+    r"""
+    Format each technical report in HTML format.
+
+    INPUT:
+
+    - techreports -- a list of dictionaries of technical reports. The
+      mandatory attributes of a technical report are: author, title,
+      institution, and year. Some optional attributes include: number,
+      address, and note.
+
+    OUTPUT:
+
+    A list of technical reports all of which are formatted in HTML
+    suitable for displaying on websites.
+    """
+    formatted_reports = []
+    for report in techreports:
+        htmlstr = "".join([format_names(report["author"]), ". "])
+        htmlstr = "".join([htmlstr, html_title(report)])
+        htmlstr = "".join([htmlstr, report["institution"], ", "])
+        if "address" in report:
+            htmlstr = "".join([htmlstr, report["address"], ", "])
+        if "number" in report:
+            htmlstr = "".join([
+                    htmlstr,
+                    "technical report number ", report["number"], ", "])
+        htmlstr = "".join([htmlstr, report["year"], "."])
+        formatted_reports.append(htmlstr.strip())
+    return map(replace_special, formatted_reports)
+
 def format_proceedings(proceedings):
     r"""
     Format each proceedings article in HTML format.
@@ -658,6 +713,7 @@ def output_html(publications, filename):
     unpublisheds = format_unpublisheds(publications["unpublisheds"])
     miscs = filter_undergraduate_theses(publications["miscs"])
     preprints = format_miscs(miscs["preprints"])
+    techreports = format_techreports(publications["techreports"])
     undergradtheses = format_miscs(miscs["undergraduatetheses"], thesis=True)
     FOUR_SPACES = "    "
     # compiled regular expressions to speed up searches
@@ -673,7 +729,9 @@ def output_html(publications, filename):
     htmlfile = open(filename, "r")
     htmlcontent = ""
     line = htmlfile.readline()
-    # get everything before the section that lists the articles
+
+    # Process the section for articles.
+    # Get everything before the section that lists the articles.
     while not re_start_articles.search(line):
         htmlcontent = "".join([htmlcontent, line])
         line = htmlfile.readline()
@@ -687,7 +745,7 @@ def output_html(publications, filename):
         line = htmlfile.readline()
     # Sort the publication items. Journal articles, items in collections,
     # and proceedings papers are grouped in one section. Sort these.
-    papers = articles + collections + proceedings
+    papers = articles + collections + proceedings + techreports
     sorted_index = sort_publications(
         publications["articles"] +
         publications["incollections"] +
@@ -698,6 +756,8 @@ def output_html(publications, filename):
         htmlcontent = "".join([
                 htmlcontent, FOUR_SPACES, "<li>", papers[index], "</li>\n"])
     htmlcontent = "".join([htmlcontent, "  </ol>\n\n"])
+
+    # Process the section for theses.
     # Get everything before the section that lists the theses. This also
     # include the stub that delimits the end of the list of articles.
     while not re_start_theses.search(line):
@@ -724,6 +784,8 @@ def output_html(publications, filename):
         htmlcontent = "".join([
                 htmlcontent, FOUR_SPACES, "<li>", theses[index], "</li>\n"])
     htmlcontent = "".join([htmlcontent, "  </ol>\n\n"])
+
+    # Process the section for books.
     # Get everything before the section that lists the books. This also
     # include the stub that delimits the end of the list of theses.
     while not re_start_books.search(line):
@@ -750,6 +812,8 @@ def output_html(publications, filename):
                 htmlcontent,
                 FOUR_SPACES, "<li>", books_list[index], "</li>\n"])
     htmlcontent = "".join([htmlcontent, "  </ol>\n\n"])
+
+    # Process the section for preprints.
     # Get everything before the section that lists the preprints. This also
     # include the stub that delimits the end of the list of books.
     while not re_start_preprints.search(line):
@@ -771,6 +835,8 @@ def output_html(publications, filename):
         htmlcontent = "".join([
                 htmlcontent, FOUR_SPACES, "<li>", preprints[index], "</li>\n"])
     htmlcontent = "".join([htmlcontent, "  </ol>\n\n"])
+
+    # Process the rest of the HTML file.
     # Get everything from here to the end of the file. This also include the
     # stub that delimits the end of the list of preprints.
     try:
@@ -785,6 +851,7 @@ def output_html(publications, filename):
         pass
     finally:
         htmlfile.close()
+
     # Replace the current publications page with another page that contains
     # updated lists of publications. This overwrites the current publications
     # page.
@@ -792,7 +859,7 @@ def output_html(publications, filename):
     outfile.write(htmlcontent)
     outfile.close()
     if CHANGE_PERMISSIONS:
-        os.system("chmod " + PERMISSIONS + " " + filename)
+        os.system("".join(["chmod ", PERMISSIONS, " ", filename]))
 
 def process_database(dbfilename):
     r"""
@@ -805,12 +872,12 @@ def process_database(dbfilename):
 
     OUTPUT:
 
-    An 8-key dictionary of processed publication entries. The number eight
+    A 9-key dictionary of processed publication entries. The number nine
     corresponds to the number of publication entries considered in this
     script. If other types of publication are added to the database besides
     the type already listed above, then the new publication type should be
-    specified in the block above. The 8-key dictionary output by this
-    function is of the form
+    specified in the block at the beginning of this script. The 9-key
+    dictionary output by this function is of the form
 
     {'articles': articles,
      'books': books,
@@ -819,6 +886,7 @@ def process_database(dbfilename):
      'masterstheses': masterstheses,
      'miscs': miscs,
      'phdtheses': phdtheses,
+     'techreports': techreports,
      'unpublisheds': unpublisheds}
 
     where each value (corresponding to a key) in the dictionary is a list of
@@ -836,6 +904,7 @@ def process_database(dbfilename):
     masterstheses = []
     miscs = []
     phdtheses = []
+    techreports = []
     unpublisheds = []
     # parse the BibTeX database
     parser = bibtex.Parser()
@@ -855,6 +924,8 @@ def process_database(dbfilename):
             miscs.append(extract_publication(bibdb.entries[key]))
         elif bibdb.entries[key].type == "phdthesis":
             phdtheses.append(extract_publication(bibdb.entries[key]))
+        elif bibdb.entries[key].type == "techreport":
+            techreports.append(extract_publication(bibdb.entries[key]))
         elif bibdb.entries[key].type == "unpublished":
             unpublisheds.append(extract_publication(bibdb.entries[key]))
         else:
@@ -867,6 +938,7 @@ def process_database(dbfilename):
             "masterstheses": masterstheses,
             "miscs": miscs,
             "phdtheses": phdtheses,
+            "techreports": techreports,
             "unpublisheds": unpublisheds}
 
 def replace_special(entry):
@@ -1036,6 +1108,8 @@ def surname(name):
 
 # the driver section; this is where everything starts from
 if __name__ == "__main__":
+    # os.system("rm " + publications_combinat)
+    # os.system("wget " +  bibtex_sage_combinat)
     db = process_database(publications_general)
     output_html(db, html_general)
     db = process_database(publications_combinat)
