@@ -507,10 +507,7 @@ def format_miscs(miscs, thesis=False):
             # handle the case: note = {<url> Bachelor thesis},
             if "http://" in note:
                 note = note[note.find(" "):].strip()
-                htmlstr = "".join([htmlstr, note, ", "])
-            # handle the case: note = {Bachelor thesis},
-            else:
-                htmlstr = "".join([htmlstr, note.strip(), ", "])
+            htmlstr = "".join([htmlstr, note, ", "])
         htmlstr = "".join([htmlstr, entry["year"], "."])
         formatted_miscs.append(htmlstr.strip())
     return map(replace_special, formatted_miscs)
