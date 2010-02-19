@@ -758,7 +758,8 @@ def output_html(publications, filename):
     sorted_index = sort_publications(
         publications["articles"] +
         publications["incollections"] +
-        publications["inproceedings"])
+        publications["inproceedings"] +
+        publications["techreports"])
     # insert the new list of articles
     htmlcontent = "".join([htmlcontent, "  <ol>\n"])
     for index in sorted_index:
