@@ -57,6 +57,10 @@ html_general = os.path.join(PWD, "library-publications.html")
 html_combinat = os.path.join(PWD, "library-publications-combinat.html")
 # upstream version of the BibTeX database of Sage-Combinat
 bibtex_sage_combinat = "http://combinat.sagemath.org/hgwebdir.cgi/misc/raw-file/tip/articles/Sage-Combinat.bib"
+# the file containing the MuPAD-Combinat BibTeX database
+publications_mupad = os.path.join(PWD, "MuPAD-Combinat.bib")
+# the file containing the MuPAD publications list formatted in HTML
+html_mupad = os.path.join(PWD, "library-publications-mupad.html")
 
 # Stuff relating to file permissions.
 # whether we should change the permissions of a file
@@ -962,10 +966,17 @@ def replace_special(entry):
                      ("{\\'a}",    "&aacute;"),
                      ("{\\\"e}",   "&euml;"),
                      ("{\\'e}",    "&eacute;"),
+                     ("\\'e",      "&eacute;"),
                      ("{\\'i}",    "&iacute;"),
                      ("{\\'o}",    "&oacute;"),
+                     ("\\`a",      "&agrave;"),
+                     ("\\`e",      "&egrave;"),
+                     ("\\`o",      "&ograve;"),
+                     ("\\\"o",     "&ouml;"),
+                     ("\\^o",      "&ocirc;"),
                      ("\\&",       "&amp;"),
                      ("\\textsc{", ""),
+                     ("\\texttt",  ""),
                      ("{",         ""),
                      ("}",         "")]
     cleansed_entry = copy.copy(entry)
@@ -1114,3 +1125,5 @@ if __name__ == "__main__":
     output_html(db, html_general)
     db = process_database(publications_combinat)
     output_html(db, html_combinat)
+    db = process_database(publications_mupad)
+    output_html(db, html_mupad)
