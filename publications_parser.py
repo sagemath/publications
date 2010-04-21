@@ -966,6 +966,7 @@ def replace_special(entry):
     characters are replaced with equivalent characters.
     """
     replace_table = [("{\\\"a}",   "&auml;"),
+                     ("\\\"a",     "&auml;"),
                      ("{\\'a}",    "&aacute;"),
                      ("{\\\"e}",   "&euml;"),
                      ("{\\'e}",    "&eacute;"),
