@@ -965,14 +965,12 @@ def replace_special(entry):
     publication entry as represented by 'entry'. However, all special
     characters are replaced with equivalent characters.
     """
-    replace_table = [("{\\\"a}",   "&auml;"),
-                     ("\\\"a",     "&auml;"),
-                     ("{\\'a}",    "&aacute;"),
-                     ("{\\\"e}",   "&euml;"),
-                     ("{\\'e}",    "&eacute;"),
+    replace_table = [("\\\"a",     "&auml;"),
+                     ("\\'a",      "&aacute;"),
+                     ("\\\"e",     "&euml;"),
                      ("\\'e",      "&eacute;"),
-                     ("{\\'i}",    "&iacute;"),
-                     ("{\\'o}",    "&oacute;"),
+                     ("\\'i",      "&iacute;"),
+                     ("\\'o",      "&oacute;"),
                      ("\\`a",      "&agrave;"),
                      ("\\`e",      "&egrave;"),
                      ("\\`o",      "&ograve;"),
