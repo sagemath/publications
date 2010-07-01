@@ -863,7 +863,7 @@ def output_html(publications, filename):
     # updated lists of publications. This overwrites the current publications
     # page.
     outfile = open(filename, "w")
-    outfile.write(htmlcontent)
+    outfile.write(replace_maths(htmlcontent))
     outfile.close()
     if CHANGE_PERMISSIONS:
         os.system("".join(["chmod ", PERMISSIONS, " ", filename]))
@@ -947,6 +947,30 @@ def process_database(dbfilename):
             "phdtheses": phdtheses,
             "techreports": techreports,
             "unpublisheds": unpublisheds}
+
+def replace_maths(s):
+    """
+    Replace each special mathematics typesetting in the given string with
+    italics.
+
+    INPUT:
+
+    - s -- a string in HTML format.
+    """
+    replace_table = [("$0$", "0"),
+                     ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"),
+                     ("$q=0$", "<i>q=0</i>"),
+                     ("$e$", "<i>e</i>"),
+                     ("$k$", "<i>k</i>"),
+                     ("$L$", "<i>L</i>"),
+                     ("$p$", "<i>p</i>"),
+                     ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
+                     ("$S_n$", "<i>S_n</i>"),
+                     ("$Z_N$", "<i>Z_N</i>")]
+    cleansed_str = copy.copy(s)
+    for candidate, target in replace_table:
+        cleansed_str = cleansed_str.replace(candidate, target)
+    return cleansed_str
 
 def replace_special(entry):
     r"""
