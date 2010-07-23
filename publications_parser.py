@@ -963,6 +963,7 @@ def replace_maths(s):
                      ("$e$", "<i>e</i>"),
                      ("$k$", "<i>k</i>"),
                      ("$L$", "<i>L</i>"),
+                     ("$\\mathbbF_q[t]$", "<i>F_q[t]</i>"),
                      ("$p$", "<i>p</i>"),
                      ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
                      ("$S_n$", "<i>S_n</i>"),
