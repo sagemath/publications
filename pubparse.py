@@ -72,7 +72,7 @@ PERMISSIONS = "755"
 # are the same as in BibTeX. In all of the publication types below, we use
 # the attribute "note" to specify a valid URL where the named publication
 # could be downloaded. A special exception is the case of the publication
-# type "misc". This type is used for specifiying both a preprint and an
+# type "misc". This type is used for specifying both a preprint and an
 # undergraduate thesis. When "misc" is used for specifying an
 # undergraduate thesis, the attribute "note" contains both a valid URL and
 # the word "thesis".
@@ -142,7 +142,7 @@ PERMISSIONS = "755"
 #
 # The attributes that describe a miscellaneous item should be listed in
 # this order in the publications database. This publication type is used for
-# specifiying both a preprint and an undergraduate thesis. When "misc" is
+# specifying both a preprint and an undergraduate thesis. When "misc" is
 # used for specifying an undergraduate thesis, the attribute "note" contains
 # both a valid URL and the word "thesis".
 #
@@ -339,7 +339,7 @@ def filter_undergraduate_theses(publications):
     OUTPUT:
 
     Separate the preprints from the undergraduate theses. The publication
-    type 'misc' is used for specifiying both a preprint and an undergraduate
+    type 'misc' is used for specifying both a preprint and an undergraduate
     thesis. When 'misc' is used for specifying an undergraduate thesis, the
     attribute 'note' contains both a valid URL and the word 'thesis'.
     """
@@ -743,7 +743,7 @@ def output_html(publications, filename):
         line = htmlfile.readline()
     # include the stub that delimits the beginning of the list of articles
     htmlcontent = "".join([htmlcontent, line, "\n"])
-    # Ignore everthing between the start of the list of articles and the
+    # Ignore everything between the start of the list of articles and the
     # end of that list. We do this because we want to insert a new list
     # of articles in between the stubs that delimit the start and end of
     # the list of articles.
