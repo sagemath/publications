@@ -186,9 +186,9 @@ PERMISSIONS = "755"
 # year
 # note
 
-
-### helper functions ######################################################
-
+##############################
+# helper functions
+##############################
 
 def extract_publication(entry_dict):
     r"""
@@ -1142,9 +1142,9 @@ def surname(name):
     first_author = author_names[0].split()
     return first_author[-1]
 
-
-# ### the main part #########################################################
-
+##############################
+# the script starts here
+##############################
 
 # the driver section; this is where everything starts from
 if __name__ == "__main__":
