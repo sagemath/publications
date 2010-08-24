@@ -467,6 +467,7 @@ def format_masterstheses(masterstheses):
     for thesis in masterstheses:
         htmlstr = "".join([format_names(thesis["author"]), ". "])
         htmlstr = "".join([htmlstr, html_title(thesis)])
+        htmlstr = "".join([htmlstr, "Masters thesis, "])
         htmlstr = "".join([htmlstr, thesis["school"], ", "])
         if "address" in thesis:
             htmlstr = "".join([htmlstr, thesis["address"], ", "])
