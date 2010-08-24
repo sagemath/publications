@@ -558,6 +558,7 @@ def format_phdtheses(phdtheses):
     for thesis in phdtheses:
         htmlstr = "".join([format_names(thesis["author"]), ". "])
         htmlstr = "".join([htmlstr, html_title(thesis)])
+        htmlstr = "".join([htmlstr, "PhD thesis, "])
         htmlstr = "".join([htmlstr, thesis["school"], ", "])
         if "address" in thesis:
             htmlstr = "".join([htmlstr, thesis["address"], ", "])
