@@ -43,7 +43,8 @@ from pybtex.database.input import bibtex
 from pybtex.style.names import plain
 
 # make sure we're at the directory where the script is located
-os.chdir("/home/mvngu/apps/pubparse")
+os.chdir("/scratch/mvngu/apps/pubparse")
+# os.chdir("/home/mvngu/apps/pubparse")
 # get the current working directory
 PWD = os.getcwd()
 
