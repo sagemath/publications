@@ -963,12 +963,16 @@ def replace_maths(s):
                      ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"),
                      ("$q=0$", "<i>q=0</i>"),
                      ("$e$", "<i>e</i>"),
+                     ("$E_6$", "<i>E_6</i>"),
                      ("$k$", "<i>k</i>"),
+                     ("$K$", "<i>K</i>"),
                      ("$L$", "<i>L</i>"),
                      ("$\\mathbbF_q[t]$", "<i>F_q[t]</i>"),
+                     ("$\\mathcalJ$", "<i>J</i>"),
                      ("$p$", "<i>p</i>"),
                      ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
                      ("$S_n$", "<i>S_n</i>"),
+                     ("$S_N$", "<i>S_N</i>"),
                      ("$Z_N$", "<i>Z_N</i>")]
     cleansed_str = copy.copy(s)
     for candidate, target in replace_table:
