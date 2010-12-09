@@ -998,6 +998,7 @@ def replace_special(entry):
     """
     replace_table = [('\\"a',      "&auml;"),
                      ("\\'a",      "&aacute;"),
+                     ("\\'A",      "&Aacute;"),
                      ('\\c{c}',    "&ccedil;"),
                      ('\\"e',      "&euml;"),
                      ("\\'e",      "&eacute;"),
