@@ -16,8 +16,6 @@
 # http://www.gnu.org/licenses/
 ###########################################################################
 
-# README
-#
 # This script requires Pybtex for parsing a BibTeX database. See
 # https://launchpad.net/pybtex for more information about Pybtex.
 #
