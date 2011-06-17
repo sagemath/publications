@@ -999,6 +999,7 @@ def replace_special(entry):
                      ("\\'A",      "&Aacute;"),
                      ('\\c{c}',    "&ccedil;"),
                      ('\\"e',      "&euml;"),
+                     ("\\'E",      "&Eacute;"),
                      ("\\'e",      "&eacute;"),
                      ("\\'i",      "&iacute;"),
                      ("\\'o",      "&oacute;"),
