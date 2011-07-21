@@ -38,7 +38,8 @@ import os
 
 # importing modules from third-party library
 from pybtex.database.input import bibtex
-from pybtex.style.names import plain
+from pybtex.style.names.plain import NameStyle
+plain = NameStyle().format
 
 # get the current working directory
 PWD = os.getcwd()
