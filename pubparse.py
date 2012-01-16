@@ -686,7 +686,7 @@ def html_title(publication):
         url = replace_special_url(url)
     title = publication["title"]
     if url != "":
-        if "http://" in url:
+        if ("http://" in url) or ("https://" in url):
             return "".join(["<a href=\"", url, "\">", title, "</a>", ". "])
     # handle the case where no URL is provided or the "note" field doesn't
     # contain a URL
