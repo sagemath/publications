@@ -974,6 +974,7 @@ def replace_maths(s):
                      ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
                      ("$S_n$", "<i>S_n</i>"),
                      ("$S_N$", "<i>S_N</i>"),
+                     ("$U_7$", "<i>U_7</i>"),
                      ("$Z_N$", "<i>Z_N</i>")]
     cleansed_str = copy.copy(s)
     for candidate, target in replace_table:
