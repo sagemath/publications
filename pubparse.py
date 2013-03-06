@@ -1015,6 +1015,7 @@ def replace_special(entry):
                      ('\\"o',       "&ouml;"),
                      ("\\^o",       "&ocirc;"),
                      ("\\o",        "&oslash;"),
+                     ('\\"u',       "&uuml;"),
                      ("\\&",        "&amp;"),
                      ("\\ss",       "&szlig;"),
                      ("\\textsc{",  ""),
