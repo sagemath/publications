@@ -959,6 +959,7 @@ def replace_maths(s):
     - s -- a string in HTML format.
     """
     replace_table = [("$0$", "0"),
+                     ("$1/2 + it$", "1/2 + <it>it</it>"),
                      ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"),
                      ("$_4$", "<sub>4</sub>"),
                      ("$q$", "<i>q</i>"),
@@ -972,6 +973,7 @@ def replace_maths(s):
                      ("$L$", "<i>L</i>"),
                      ("$\\mathbbF_q[t]$", "<i>F_q[t]</i>"),
                      ("$\\mathcalJ$", "<i>J</i>"),
+                     ("$N$", "<i>N</i>"),
                      ("$p$", "<i>p</i>"),
                      ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
                      ("$S_n$", "<i>S_n</i>"),
@@ -1000,7 +1002,8 @@ def replace_special(entry):
     publication entry as represented by 'entry'. However, all special
     characters are replaced with equivalent characters.
     """
-    replace_table = [('\\"a',       "&auml;"),
+    replace_table = [("$\frac{1}{2}$ + \emph{it}", "1/2 + it"),
+                     ('\\"a',       "&auml;"),
                      ("\\'a",       "&aacute;"),
                      ("\\'A",       "&Aacute;"),
                      ('\\c{c}',     "&ccedil;"),
