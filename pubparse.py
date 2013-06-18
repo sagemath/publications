@@ -967,6 +967,7 @@ def replace_maths(s):
                      ("$e$", "<i>e</i>"),
                      ("$E_6$", "<i>E_6</i>"),
                      ("$\\Gamma$", "&Gamma;"),
+                     ("$\\Gamma_0(9)$", "&Gamma;<sub>0</sub>(9)"),
                      ("$\\Gamma_H(N)$", "&Gamma;<sub>H</sub>(N)"),
                      ("$k$", "<i>k</i>"),
                      ("$K$", "<i>K</i>"),
