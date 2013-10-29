@@ -1031,6 +1031,7 @@ def replace_special(entry):
                      ("\\ss",       "&szlig;"),
                      ("\\textsc{",  ""),
                      ("\\texttt",   ""),
+                     ("\\u{a}",     "&#259;"),
                      ("{",          ""),
                      ("}",          "")]
     cleansed_entry = copy.copy(entry)
