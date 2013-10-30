@@ -961,6 +961,7 @@ def replace_maths(s):
     replace_table = [("$0$", "0"),
                      ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"),
                      ("$_4$", "<sub>4</sub>"),
+                     ("$\~A_2$", "&Atilde;<sub>2</sub>"),
                      ("$q$", "<i>q</i>"),
                      ("$q=0$", "<i>q=0</i>"),
                      ("$D$", "<i>D</i>"),
@@ -980,7 +981,8 @@ def replace_maths(s):
                      ("$S_n$", "<i>S_n</i>"),
                      ("$S_N$", "<i>S_N</i>"),
                      ("$U_7$", "<i>U_7</i>"),
-                     ("$Z_N$", "<i>Z_N</i>")]
+                     ("$Z_N$", "<i>Z_N</i>"),
+                     ("$\zeta(s) - c$", "&zeta;(s) - c")]
     cleansed_str = copy.copy(s)
     for candidate, target in replace_table:
         cleansed_str = cleansed_str.replace(candidate, target)
@@ -1008,6 +1010,7 @@ def replace_special(entry):
                      ('\\"a',       "&auml;"),
                      ("\\'a",       "&aacute;"),
                      ("\\'A",       "&Aacute;"),
+                     ("\\`a",       "&agrave;"),
                      ('\\c{c}',     "&ccedil;"),
                      ('\\v{c}',     "&#269;"),
                      ('\\"e',       "&euml;"),
