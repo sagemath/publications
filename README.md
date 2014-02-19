@@ -3,13 +3,17 @@ Sage Publications
 
 License: GPLv2+
 
-Authors: 
+Authors:
 * Minh Van Nguyen <mvngu.name@gmail.com>
 
 Description:
 
 This script requires Pybtex for parsing a BibTeX database. See
 https://launchpad.net/pybtex for more information about Pybtex.
+
+Install it this way:
+
+    $ pip install -M -U --user pybtex
 
 The general database of publications that cite Sage is contained in the
 text file named by the variable publications_general. The file referred to
