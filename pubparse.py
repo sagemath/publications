@@ -292,7 +292,7 @@ def extract_publication(entry_dict):
     publication_dict = {}
     for attribute in entry_dict.fields.keys():
         publication_dict.setdefault(
-            str(attribute).strip(),
+            str(attribute).strip().lower(),
             str(entry_dict.fields[attribute]).strip())
     # The author field is a required field in BibTeX format.
     # Extract author names.
