@@ -61,15 +61,15 @@ publications_general = os.path.join(PWD, "bibliography-sage.bib")
 # the file containing the Sage-Combinat publications database
 publications_combinat = os.path.join(PWD, "Sage-Combinat.bib")
 # the file containing the general bibliography formatted in HTML
-html_general = os.path.join(PWD, "library-publications.html")
+html_general = os.path.join(PWD, "publications-general.html")
 # the file containing the Sage-Combinat bibliography formatted in HTML
-html_combinat = os.path.join(PWD, "library-publications-combinat.html")
+html_combinat = os.path.join(PWD, "publications-combinat.html")
 # upstream version of the BibTeX database of Sage-Combinat
 #bibtex_sage_combinat = "http://combinat.sagemath.org/hgwebdir.cgi/misc/raw-file/tip/articles/Sage-Combinat.bib"
 # the file containing the MuPAD-Combinat BibTeX database
 publications_mupad = os.path.join(PWD, "MuPAD-Combinat.bib")
 # the file containing the MuPAD publications list formatted in HTML
-html_mupad = os.path.join(PWD, "library-publications-mupad.html")
+html_mupad = os.path.join(PWD, "publications-mupad.html")
 
 # Stuff relating to file permissions.
 # whether we should change the permissions of a file
