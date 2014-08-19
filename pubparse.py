@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 ###########################################################################
-# Copyright (c) 2009--2013 Minh Van Nguyen <mvngu.name@gmail.com>
+# Copyright (c) 2009--2014 Minh Van Nguyen <mvngu.name@gmail.com>
+#                          Harald Schilly <harald.schilly@gmail.com>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -905,49 +906,32 @@ def process_database(dbfilename):
     """
     # Lists of dictionaries of publication entries. Each list contains
     # several dictionaries of publication entries of the same type.
-    articles = []
-    books = []
-    incollections = []
+    article = []
+    book = []
+    incollection = []
     inproceedings = []
-    masterstheses = []
-    miscs = []
-    phdtheses = []
-    techreports = []
-    unpublisheds = []
+    mastersthesis = []
+    misc = []
+    phdthesis = []
+    techreport = []
+    unpublished = []
     # parse the BibTeX database
     parser = bibtex.Parser()
     bibdb = parser.parse_file(dbfilename)
     for key in bibdb.entries.keys():
-        if bibdb.entries[key].type == "article":
-            articles.append(extract_publication(bibdb.entries[key]))
-        elif bibdb.entries[key].type == "book":
-            books.append(extract_publication(bibdb.entries[key]))
-        elif bibdb.entries[key].type == "incollection":
-            incollections.append(extract_publication(bibdb.entries[key]))
-        elif bibdb.entries[key].type == "inproceedings":
-            inproceedings.append(extract_publication(bibdb.entries[key]))
-        elif bibdb.entries[key].type == "mastersthesis":
-            masterstheses.append(extract_publication(bibdb.entries[key]))
-        elif bibdb.entries[key].type == "misc":
-            miscs.append(extract_publication(bibdb.entries[key]))
-        elif bibdb.entries[key].type == "phdthesis":
-            phdtheses.append(extract_publication(bibdb.entries[key]))
-        elif bibdb.entries[key].type == "techreport":
-            techreports.append(extract_publication(bibdb.entries[key]))
-        elif bibdb.entries[key].type == "unpublished":
-            unpublisheds.append(extract_publication(bibdb.entries[key]))
-        else:
-            raise ValueError(
-                "Unsupported publication type %s" % bibdb.entries[key].type)
-    return {"articles": articles,
-            "books": books,
-            "incollections": incollections,
+        pub_type = bibdb.entries[key].type
+        pub_list = locals()[pub_type]
+        pub_list.append(extract_publication(bibdb.entries[key]))
+
+    return {"articles": article,
+            "books": book,
+            "incollections": incollection,
             "inproceedings": inproceedings,
-            "masterstheses": masterstheses,
-            "miscs": miscs,
-            "phdtheses": phdtheses,
-            "techreports": techreports,
-            "unpublisheds": unpublisheds}
+            "masterstheses": mastersthesis,
+            "miscs": misc,
+            "phdtheses": phdthesis,
+            "techreports": techreport,
+            "unpublisheds": unpublished}
 
 def replace_maths(s):
     """
