@@ -1094,9 +1094,13 @@ def surname(name):
 if __name__ == "__main__":
     # os.system("rm " + publications_combinat)
     # os.system("wget " +  bibtex_sage_combinat)
+    print("  ... general")
     db = process_database(publications_general)
     output_html(db, html_general)
+    print("  ... combinat")
     db = process_database(publications_combinat)
     output_html(db, html_combinat)
+    print("  ... mupad")
     db = process_database(publications_mupad)
     output_html(db, html_mupad)
+    print("done")
