@@ -1094,13 +1094,21 @@ def surname(name):
 if __name__ == "__main__":
     # os.system("rm " + publications_combinat)
     # os.system("wget " +  bibtex_sage_combinat)
-    print("  ... general")
-    db = process_database(publications_general)
-    output_html(db, html_general)
-    print("  ... combinat")
-    db = process_database(publications_combinat)
-    output_html(db, html_combinat)
-    print("  ... mupad")
-    db = process_database(publications_mupad)
-    output_html(db, html_mupad)
-    print("done")
+    import sys
+    if len(sys.argv) >= 2:
+        what = sys.argv[1]
+    else:
+        what = True
+    if what is True or what == "sage":
+        print("  ... sage")
+        db = process_database(publications_general)
+        output_html(db, html_general)
+    if what is True or what == "combinat":
+        print("  ... combinat")
+        db = process_database(publications_combinat)
+        output_html(db, html_combinat)
+    if what is True or what == "mupad":
+        print("  ... mupad")
+        db = process_database(publications_mupad)
+        output_html(db, html_mupad)
+    print("done doing %s" % ("all" if what is True else what))

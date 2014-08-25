@@ -8,13 +8,13 @@ default: build
 build: publications-combinat.html publications-general.html publications-mupad.html
 
 publications-general.html: bibliography-sage.bib $(SCRIPT)
-	$(RUN)
+	$(RUN) sage
 
 publications-combinat.html: Sage-Combinat.bib $(SCRIPT)
-	$(RUN)
+	$(RUN) combinat
 
 publications-mupad.html: MuPAD-Combinat.bib $(SCRIPT)
-	$(RUN)
+	$(RUN) mupad
 
 clean:
 	- rm -f *.html
