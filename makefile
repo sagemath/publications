@@ -5,7 +5,11 @@ RUN = python $(SCRIPT)
 
 default: build
 
-build: publications-combinat.html publications-general.html publications-mupad.html
+build: update publications-combinat.html publications-general.html publications-mupad.html
+
+update:
+	git fetch origin
+	git reset --hard origin/master
 
 publications-general.html: bibliography-sage.bib $(SCRIPT)
 	$(RUN) sage
