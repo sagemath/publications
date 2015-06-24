@@ -9,7 +9,7 @@ build: update publications-combinat.html publications-general.html publications-
 
 update:
 	git fetch origin
-	git reset --hard origin/master
+	git pull origin master
 
 publications-general.html: bibliography-sage.bib $(SCRIPT)
 	$(RUN) sage
