@@ -696,6 +696,10 @@ def html_title(publication):
     if "note" in publication:
         url = publication["note"].split()[0]
         url = replace_special_url(url)
+    # override note url's with url url's (if they exist)
+    if "url" in publication:
+        url = publication["url"].split()[0]
+        url = replace_special_url(url)
     title = publication["title"]
     if url != "":
         if ("http://" in url) or ("https://" in url):
