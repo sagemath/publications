@@ -1,5 +1,5 @@
-Sage Publications
------------------
+# Sage Publications [![Build Status](https://travis-ci.org/sagemath/publications.svg?branch=master)](https://travis-ci.org/sagemath/publications)
+
 
 License: GPLv2+
 
