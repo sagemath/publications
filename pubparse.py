@@ -922,38 +922,39 @@ def replace_special(entry):
     """
     replace_table = [("$\\frac{1}{2}$ + \\emph{it}", "1/2 + <i>it</i>"),
                      ("\\emph{via}", "<i>via</i>"),
-                     ('\\"a',       "&auml;"),
-                     ("\\'a",       "&aacute;"),
-                     ("\\'A",       "&Aacute;"),
-                     ("\\`a",       "&agrave;"),
-                     ('\\c{c}',     "&ccedil;"),
-                     ('\\c{s}',     "&scedil;"),
-                     ('\\c{t}',     "&tcedil;"),
-                     ('\\v{c}',     "&#269;"),
-                     ('\\"e',       "&euml;"),
-                     ("\\'E",       "&Eacute;"),
-                     ("\\'e",       "&eacute;"),
-                     ("\\'i",       "&iacute;"),
-                     ("\\`i",       "&igrave;"),
-                     ('\\"i',       "&iuml;"),
-                     ("\\k{e}",     "&#281;"),
-                     ("\\l",        "&#0322;"),
-                     ("\\'o",       "&oacute;"),
-                     ("\\`a",       "&agrave;"),
-                     ("\\`e",       "&egrave;"),
-                     ("\\tilde{n}", "&ntilde;"),
-                     ("\\`o",       "&ograve;"),
-                     ('\\"o',       "&ouml;"),
-                     ("\\^o",       "&ocirc;"),
-                     ("\\o",        "&oslash;"),
-                     ('\\"u',       "&uuml;"),
-                     ('\\^u',       "&ucirc;"),
-                     ("\\'u",       "&uacute;"),
-                     ("\\&",        "&amp;"),
-                     ("\\ss",       "&szlig;"),
+                     ("\\&",        "&amp;"),       # ampersand
+                     ("\\'a",       "&aacute;"),    # a acute
+                     ("\\u{a}",     "&#259;"),      # a breve
+                     ("\\'A",       "&Aacute;"),    # A acute
+                     ("\\`a",       "&agrave;"),    # a grave
+                     ("\\k{a}",     "&#261;"),      # a ogonek (Polish)
+                     ('\\"a',       "&auml;"),      # a umlaut
+                     ("\\'{c}",     "&#263;"),      # c acute (Polish)
+                     ("\\c{c}",     "&ccedil;"),    # c cedilla
+                     ("\\v{c}",     "&#269;"),      # c czech (Czech)
+                     ("\\'e",       "&eacute;"),    # e acute
+                     ("\\'E",       "&Eacute;"),    # E acute
+                     ("\\`e",       "&egrave;"),    # e grave
+                     ("\\k{e}",     "&#281;"),      # e ogonek (Polish)
+                     ('\\"e',       "&euml;"),      # e umlaut
+                     ("\\'i",       "&iacute;"),    # i acute
+                     ("\\`i",       "&igrave;"),    # i grave
+                     ('\\"i',       "&iuml;"),      # i umlaut
+                     ("\\l",        "&#0322;"),     # l bar (Polish)
+                     ("\\tilde{n}", "&ntilde;"),    # n tilde
+                     ("\\'o",       "&oacute;"),    # o acute
+                     ("\\^o",       "&ocirc;"),     # o circumflex
+                     ("\\`o",       "&ograve;"),    # o grave
+                     ('\\"o',       "&ouml;"),      # o umlaut
+                     ("\\o",        "&oslash;"),    # o slash
+                     ("\\c{s}",     "&scedil;"),    # s cedilla
+                     ("\\c{t}",     "&tcedil;"),    # t cedilla
+                     ("\\'u",       "&uacute;"),    # u acute
+                     ("\\^u",       "&ucirc;"),     # u circumflex
+                     ('\\"u',       "&uuml;"),      # u umlaut
+                     ("\\ss",       "&szlig;"),     # sz ligature
                      ("\\textsc{",  ""),
-                     ("\\texttt",   ""),
-                     ("\\u{a}",     "&#259;"),
+                     ("\\texttt{",  ""),
                      ("{",          ""),
                      ("}",          "")]
     cleansed_entry = copy.copy(entry)
