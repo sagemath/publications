@@ -953,6 +953,7 @@ def replace_special(entry):
                      ("\\^u",       "&ucirc;"),     # u circumflex
                      ('\\"u',       "&uuml;"),      # u umlaut
                      ("\\ss",       "&szlig;"),     # sz ligature
+                     ("\\scr{R}",   "&#x211b;"),
                      ("\\textsc{",  ""),
                      ("\\texttt{",  ""),
                      ("{",          ""),
