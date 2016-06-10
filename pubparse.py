@@ -310,13 +310,13 @@ def extract_publication(entry_dict):
     # Extract author names.
     authors_str = ""
     authors_list = entry_dict.persons["author"]
-    authors_str = str(plain(authors_list[0]).format().plaintext())
+    authors_str = unicode(plain(authors_list[0]).format().plaintext())
     if len(authors_list) > 1:
         for author in authors_list[1:]:
-            authors_str = "".join([
+            authors_str = u"".join([
                     authors_str,
                     " and ",
-                    str(plain(author).format().plaintext())])
+                    unicode(plain(author).format().plaintext())])
     authors_str = authors_str.replace("<nbsp>", " ")
     publication_dict.setdefault("author", authors_str)
     # The editor field is an optional field in BibTeX format.
@@ -324,13 +324,13 @@ def extract_publication(entry_dict):
     if "editor" in entry_dict.persons:
         editors_str = ""
         editors_list = entry_dict.persons["editor"]
-        editors_str = str(plain(editors_list[0]).format().plaintext())
+        editors_str = unicode(plain(editors_list[0]).format().plaintext())
         if len(editors_list) > 1:
             for editor in editors_list[1:]:
-                editors_str = "".join([
+                editors_str = u"".join([
                         editors_str,
                         " and ",
-                        str(plain(editor).format().plaintext())])
+                        unicode(plain(editor).format().plaintext())])
         editors_str = editors_str.replace("<nbsp>", " ")
         publication_dict.setdefault("editor", editors_str)
     return publication_dict
