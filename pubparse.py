@@ -848,7 +848,13 @@ def process_database(dbfilename):
     for key in bibdb.entries.keys():
         pub_type = bibdb.entries[key].type
         pub_list = locals()[pub_type]
-        pub_list.append(extract_publication(bibdb.entries[key]))
+        try:
+            pub_list.append(extract_publication(bibdb.entries[key]))
+        except Exception as ex:
+            import json
+            print(key)
+            print(json.dumps(bibdb.entries[key]))
+            raise ex
 
     return {"articles": article,
             "books": book,
