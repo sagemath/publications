@@ -5,7 +5,7 @@ RUN = python $(SCRIPT)
 
 default: build
 
-build: update publications-combinat.html publications-general.html publications-mupad.html
+build: update publications-combinat.html publications-general.html publications-mupad.html publications-mathscinet.html
 
 update:
 	git fetch origin
@@ -19,6 +19,9 @@ publications-combinat.html: Sage-Combinat.bib $(SCRIPT)
 
 publications-mupad.html: MuPAD-Combinat.bib $(SCRIPT)
 	$(RUN) mupad
+
+publications-mathscinet.html: mathscinet.bib $(SCRIPT)
+	$(RUN) mathscinet
 
 clean:
 	- rm -f *.html
