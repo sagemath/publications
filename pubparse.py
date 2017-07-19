@@ -70,6 +70,9 @@ html_combinat = os.path.join(PWD, "publications-combinat.html")
 publications_mupad = os.path.join(PWD, "MuPAD-Combinat.bib")
 # the file containing the MuPAD publications list formatted in HTML
 html_mupad = os.path.join(PWD, "publications-mupad.html")
+# MathSciNet
+publications_mathscinet = os.path.join(PWD, 'mathscinet.bib')
+html_mathscinet = os.path.join(PWD, 'publications-mathscinet.html')
 
 # Stuff relating to file permissions.
 # whether we should change the permissions of a file
@@ -845,7 +848,13 @@ def process_database(dbfilename):
     for key in bibdb.entries.keys():
         pub_type = bibdb.entries[key].type
         pub_list = locals()[pub_type]
-        pub_list.append(extract_publication(bibdb.entries[key]))
+        try:
+            pub_list.append(extract_publication(bibdb.entries[key]))
+        except Exception as ex:
+            import json
+            print(key)
+            print(json.dumps(bibdb.entries[key]))
+            raise ex
 
     return {"articles": article,
             "books": book,
@@ -1117,4 +1126,8 @@ if __name__ == "__main__":
         print("  ... mupad")
         db = process_database(publications_mupad)
         output_html(db, html_mupad)
+    if what is True or what == "mathscinet":
+        print(" ... mathscinet")
+        db = process_database(publications_mathscinet)
+        output_html(db, html_mathscinet)
     print("done doing %s" % ("all" if what is True else what))
