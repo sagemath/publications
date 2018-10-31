@@ -37,6 +37,7 @@ import copy
 import re
 import os
 import sys
+from pprint import pprint
 
 # importing modules from third-party library
 try:
@@ -202,6 +203,7 @@ PERMISSIONS = "755"
 # helper functions
 ##############################
 
+
 def extract_publication(entry_dict):
     r"""
     Extract a publication entry from the given dictionary.
@@ -308,7 +310,7 @@ def extract_publication(entry_dict):
     for attribute in entry_dict.fields.keys():
         publication_dict.setdefault(
             str(attribute).strip().lower(),
-            str(entry_dict.fields[attribute]).strip())
+            unicode(entry_dict.fields[attribute]).strip())
     # The author field is a required field in BibTeX format.
     # Extract author names.
     authors_str = ""
@@ -317,9 +319,9 @@ def extract_publication(entry_dict):
     if len(authors_list) > 1:
         for author in authors_list[1:]:
             authors_str = u"".join([
-                    authors_str,
-                    " and ",
-                    unicode(plain(author).format().plaintext())])
+                authors_str, " and ",
+                unicode(plain(author).format().plaintext())
+            ])
     authors_str = authors_str.replace("<nbsp>", " ")
     publication_dict.setdefault("author", authors_str)
     # The editor field is an optional field in BibTeX format.
@@ -331,12 +333,13 @@ def extract_publication(entry_dict):
         if len(editors_list) > 1:
             for editor in editors_list[1:]:
                 editors_str = u"".join([
-                        editors_str,
-                        " and ",
-                        unicode(plain(editor).format().plaintext())])
+                    editors_str, " and ",
+                    unicode(plain(editor).format().plaintext())
+                ])
         editors_str = editors_str.replace("<nbsp>", " ")
         publication_dict.setdefault("editor", editors_str)
     return publication_dict
+
 
 def filter_undergraduate_theses(publications):
     r"""
@@ -362,8 +365,11 @@ def filter_undergraduate_theses(publications):
             undergraduate_theses.append(item)
         else:
             preprints.append(item)
-    return {"preprints": preprints,
-            "undergraduatetheses": undergraduate_theses}
+    return {
+        "preprints": preprints,
+        "undergraduatetheses": undergraduate_theses
+    }
+
 
 def format_articles(articles):
     r"""
@@ -386,16 +392,24 @@ def format_articles(articles):
     formatted_articles = []
     optional_attributes = ["volume", "number", "pages"]
     for article in articles:
-        htmlstr = "".join([format_names(article["author"]), ". "])
-        htmlstr = "".join([htmlstr, html_title(article)])
-        htmlstr = "".join([htmlstr, article["journal"], ", "])
-        for attribute in optional_attributes:
-            if attribute in article:
-                htmlstr = "".join([
-                        htmlstr, attribute, " ", article[attribute], ", "])
-        htmlstr = "".join([htmlstr, article["year"], "."])
-        formatted_articles.append(htmlstr.strip())
+        try:
+            htmlstr = "".join([format_names(article["author"]), ". "])
+            htmlstr = "".join([htmlstr, html_title(article)])
+            aj = article.get("journal", article['journaltitle'])
+            htmlstr = "".join([htmlstr, aj, ", "])
+            for attribute in optional_attributes:
+                if attribute in article:
+                    htmlstr = "".join(
+                        [htmlstr, attribute, " ", article[attribute], ", "])
+            ay = article.get("year", article['date'])
+            htmlstr = "".join([htmlstr, ay, "."])
+            formatted_articles.append(htmlstr.strip())
+        except Exception as ex:
+            from pprint import pprint
+            pprint(article)
+            raise ex
     return map(replace_special, formatted_articles)
+
 
 def format_books(books):
     r"""
@@ -416,16 +430,19 @@ def format_books(books):
     """
     formatted_books = []
     for book in books:
-        htmlstr = "".join([format_names(book["author"]), ". "])
-        htmlstr = "".join([htmlstr, html_title(book)])
-        if "edition" in book:
-            htmlstr = "".join([htmlstr, book["edition"], " edition, "])
-        htmlstr = "".join([
-                htmlstr,
-                book["publisher"], ", ",
-                book["year"], "."])
-        formatted_books.append(htmlstr.strip())
+        try:
+            htmlstr = "".join([format_names(book["author"]), ". "])
+            htmlstr = "".join([htmlstr, html_title(book)])
+            if "edition" in book:
+                htmlstr = "".join([htmlstr, book["edition"], " edition, "])
+            by = book.get("year", book["date"])
+            htmlstr = "".join([htmlstr, book["publisher"], ", ", by, "."])
+            formatted_books.append(htmlstr.strip())
+        except Exception as ex:
+            pprint(book)
+            raise ex
     return map(replace_special, formatted_books)
+
 
 def format_collections(collections):
     r"""
@@ -449,16 +466,19 @@ def format_collections(collections):
         htmlstr = "".join([format_names(entry["author"]), ". "])
         htmlstr = "".join([htmlstr, html_title(entry)])
         if "editor" in entry:
-            htmlstr = "".join([
-                    htmlstr, "In ", format_names(entry["editor"]), " (ed.). "])
+            htmlstr = "".join(
+                [htmlstr, "In ",
+                 format_names(entry["editor"]), " (ed.). "])
         htmlstr = "".join([htmlstr, entry["booktitle"], ". "])
         if "publisher" in entry:
             htmlstr = "".join([htmlstr, entry["publisher"], ", "])
         if "pages" in entry:
             htmlstr = "".join([htmlstr, "pages ", entry["pages"], ", "])
-        htmlstr = "".join([htmlstr, entry["year"], "."])
+        ay = entry.get("year", entry['date'])
+        htmlstr = "".join([htmlstr, ay, "."])
         formatted_entries.append(htmlstr.strip())
     return map(replace_special, formatted_entries)
+
 
 def format_masterstheses(masterstheses):
     r"""
@@ -487,6 +507,7 @@ def format_masterstheses(masterstheses):
         formatted_theses.append(htmlstr.strip())
     return map(replace_special, formatted_theses)
 
+
 def format_miscs(miscs, thesis=False):
     r"""
     Format each miscellaneous entry in HTML format. Here, a miscellaneous
@@ -511,19 +532,25 @@ def format_miscs(miscs, thesis=False):
     """
     formatted_miscs = []
     for entry in miscs:
-        htmlstr = "".join([format_names(entry["author"]), ". "])
-        htmlstr = "".join([htmlstr, html_title(entry)])
-        if "howpublished" in entry:
-            htmlstr = "".join([htmlstr, entry["howpublished"], ", "])
-        if thesis:
-            note = entry["note"]
-            # handle the case: note = {<url> Bachelor thesis},
-            if "http://" in note:
-                note = note[note.find(" "):].strip()
-            htmlstr = "".join([htmlstr, note, ", "])
-        htmlstr = "".join([htmlstr, entry["year"], "."])
-        formatted_miscs.append(htmlstr.strip())
+        try:
+            htmlstr = "".join([format_names(entry["author"]), ". "])
+            htmlstr = "".join([htmlstr, html_title(entry)])
+            if "howpublished" in entry:
+                htmlstr = "".join([htmlstr, entry["howpublished"], ", "])
+            if thesis:
+                note = entry["note"]
+                # handle the case: note = {<url> Bachelor thesis},
+                if "http://" in note:
+                    note = note[note.find(" "):].strip()
+                htmlstr = "".join([htmlstr, note, ", "])
+            y = entry.get("year", entry['date'])
+            htmlstr = "".join([htmlstr, y, "."])
+            formatted_miscs.append(htmlstr.strip())
+        except Exception as ex:
+            pprint(entry)
+            raise ex
     return map(replace_special, formatted_miscs)
+
 
 def format_names(names):
     r"""
@@ -551,6 +578,7 @@ def format_names(names):
             formatted_names[i] = "".join([formatted_names[i], ", "])
         return "".join(formatted_names)
 
+
 def format_phdtheses(phdtheses):
     r"""
     Format each PhD thesis in HTML format.
@@ -568,15 +596,22 @@ def format_phdtheses(phdtheses):
     """
     formatted_theses = []
     for thesis in phdtheses:
-        htmlstr = "".join([format_names(thesis["author"]), ". "])
-        htmlstr = "".join([htmlstr, html_title(thesis)])
-        htmlstr = "".join([htmlstr, "PhD thesis, "])
-        htmlstr = "".join([htmlstr, thesis["school"], ", "])
-        if "address" in thesis:
-            htmlstr = "".join([htmlstr, thesis["address"], ", "])
-        htmlstr = "".join([htmlstr, thesis["year"], "."])
-        formatted_theses.append(htmlstr.strip())
+        try:
+            htmlstr = "".join([format_names(thesis["author"]), ". "])
+            htmlstr = "".join([htmlstr, html_title(thesis)])
+            htmlstr = "".join([htmlstr, "PhD thesis, "])
+            ts = thesis.get('school', thesis['institution'])
+            htmlstr = "".join([htmlstr, ts, ", "])
+            if "address" in thesis:
+                htmlstr = "".join([htmlstr, thesis["address"], ", "])
+            ty = thesis.get('year', thesis['date'])
+            htmlstr = "".join([htmlstr, ty, "."])
+            formatted_theses.append(htmlstr.strip())
+        except Exception as ex:
+            pprint(thesis)
+            raise ex
     return map(replace_special, formatted_theses)
+
 
 def format_techreports(techreports):
     r"""
@@ -602,12 +637,13 @@ def format_techreports(techreports):
         if "address" in report:
             htmlstr = "".join([htmlstr, report["address"], ", "])
         if "number" in report:
-            htmlstr = "".join([
-                    htmlstr,
-                    "technical report number ", report["number"], ", "])
-        htmlstr = "".join([htmlstr, report["year"], "."])
+            htmlstr = "".join(
+                [htmlstr, "technical report number ", report["number"], ", "])
+        y = report.get("year", report['date'])
+        htmlstr = "".join([htmlstr, y, "."])
         formatted_reports.append(htmlstr.strip())
     return map(replace_special, formatted_reports)
+
 
 def format_proceedings(proceedings):
     r"""
@@ -630,27 +666,26 @@ def format_proceedings(proceedings):
         htmlstr = "".join([format_names(article["author"]), ". "])
         htmlstr = "".join([htmlstr, html_title(article)])
         if "editor" in article:
-            htmlstr = "".join([
-                    htmlstr,
-                    "In ", format_names(article["editor"]), " (ed.). "])
+            htmlstr = "".join(
+                [htmlstr, "In ",
+                 format_names(article["editor"]), " (ed.). "])
         htmlstr = "".join([htmlstr, article["booktitle"], ". "])
         if "publisher" in article:
             htmlstr = "".join([htmlstr, article["publisher"], ", "])
         if "series" in article:
             htmlstr = "".join([htmlstr, article["series"], ", "])
         if "volume" in article:
-            htmlstr = "".join([
-                    htmlstr, "volume ", article["volume"], ", "])
+            htmlstr = "".join([htmlstr, "volume ", article["volume"], ", "])
         if "pages" in article:
             if htmlstr.strip()[-1] == ".":
-                htmlstr = "".join([
-                        htmlstr, "Pages ", article["pages"], ", "])
+                htmlstr = "".join([htmlstr, "Pages ", article["pages"], ", "])
             else:
-                htmlstr = "".join([
-                        htmlstr, "pages ", article["pages"], ", "])
-        htmlstr = "".join([htmlstr, article["year"], "."])
+                htmlstr = "".join([htmlstr, "pages ", article["pages"], ", "])
+        ay = article.get("year", article['date'])
+        htmlstr = "".join([htmlstr, ay, "."])
         formatted_proceedings.append(htmlstr.strip())
     return map(replace_special, formatted_proceedings)
+
 
 def format_unpublisheds(unpublisheds):
     r"""
@@ -670,13 +705,19 @@ def format_unpublisheds(unpublisheds):
     """
     formatted_entries = []
     for entry in unpublisheds:
-        htmlstr = "".join([format_names(entry["author"]), ". "])
-        htmlstr = "".join([htmlstr, html_title(entry)])
-        if "month" in entry:
-            htmlstr = "".join([htmlstr, entry["month"], ", "])
-        htmlstr = "".join([htmlstr, entry["year"], "."])
-        formatted_entries.append(htmlstr.strip())
+        try:
+            htmlstr = "".join([format_names(entry["author"]), ". "])
+            htmlstr = "".join([htmlstr, html_title(entry)])
+            if "month" in entry:
+                htmlstr = "".join([htmlstr, entry["month"], ", "])
+            y = entry.get('year', entry['date'])
+            htmlstr = "".join([htmlstr, y, "."])
+            formatted_entries.append(htmlstr.strip())
+        except Exception as ex:
+            pprint(entry)
+            raise ex
     return map(replace_special, formatted_entries)
+
 
 def html_title(publication):
     r"""
@@ -710,6 +751,7 @@ def html_title(publication):
     # handle the case where no URL is provided or the "note" field doesn't
     # contain a URL
     return "".join([title, ". "])
+
 
 def output_html(publications, filename):
     r"""
@@ -760,29 +802,25 @@ def output_html(publications, filename):
     # and proceedings papers are grouped in one section. Sort these.
     papers = articles + collections + proceedings + techreports
     sorted_index = sort_publications(
-        publications["articles"] +
-        publications["incollections"] +
-        publications["inproceedings"] +
-        publications["techreports"])
+        publications["articles"] + publications["incollections"] +
+        publications["inproceedings"] + publications["techreports"])
     # insert the new list of articles
     htmlcontent += macro("papers", sorted_index, papers)
 
     # Sort the list of theses. These include PhD, Master's, and undergraduate
     # theses.
     theses = masterstheses + phdtheses + undergradtheses
-    sorted_index = sort_publications(
-        publications["masterstheses"] +
-        publications["phdtheses"] +
-        miscs["undergraduatetheses"])
+    sorted_index = sort_publications(publications["masterstheses"] +
+                                     publications["phdtheses"] +
+                                     miscs["undergraduatetheses"])
     # insert the new list of theses
     htmlcontent += macro("thesis", sorted_index, theses)
 
     # Sort the list of books. These include both published books and
     # unpublished manuscripts.
     books_list = books + unpublisheds
-    sorted_index = sort_publications(
-        publications["books"] +
-        publications["unpublisheds"])
+    sorted_index = sort_publications(publications["books"] +
+                                     publications["unpublisheds"])
     htmlcontent += macro("books", sorted_index, books_list)
 
     # Sort the list of preprints.
@@ -796,6 +834,7 @@ def output_html(publications, filename):
 
     if CHANGE_PERMISSIONS:
         os.system("".join(["chmod ", PERMISSIONS, " ", filename]))
+
 
 def process_database(dbfilename):
     r"""
@@ -839,8 +878,8 @@ def process_database(dbfilename):
     inproceedings = []
     mastersthesis = []
     misc = []
-    phdthesis = []
-    techreport = []
+    phdthesis = thesis = []
+    techreport = report = []
     unpublished = []
     # parse the BibTeX database
     parser = bibtex.Parser()
@@ -851,20 +890,24 @@ def process_database(dbfilename):
         try:
             pub_list.append(extract_publication(bibdb.entries[key]))
         except Exception as ex:
+            #raise ex
             import json
             print(key)
             print(json.dumps(bibdb.entries[key]))
             raise ex
 
-    return {"articles": article,
-            "books": book,
-            "incollections": incollection,
-            "inproceedings": inproceedings,
-            "masterstheses": mastersthesis,
-            "miscs": misc,
-            "phdtheses": phdthesis,
-            "techreports": techreport,
-            "unpublisheds": unpublished}
+    return {
+        "articles": article,
+        "books": book,
+        "incollections": incollection,
+        "inproceedings": inproceedings,
+        "masterstheses": mastersthesis,
+        "miscs": misc,
+        "phdtheses": phdthesis,
+        "techreports": techreport,
+        "unpublisheds": unpublished
+    }
+
 
 def replace_maths(s):
     """
@@ -875,42 +918,39 @@ def replace_maths(s):
 
     - s -- a string in HTML format.
     """
-    replace_table = [("$0$", "0"),
-                     ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"),
-                     ("$_4$", "<sub>4</sub>"),
-                     ("$\~A_2$", "&Atilde;<sub>2</sub>"),
-                     ("$f^*$", "f<sup>*</sup>"),
-                     ("$q$", "<i>q</i>"),
-                     ("$q=0$", "<i>q=0</i>"),
-                     ("$D$", "<i>D</i>"),
-                     ("$e$", "<i>e</i>"),
-                     ("$E_6$", "<i>E_6</i>"),
-                     ("$F_4$", "F<sub>4</sub>"),
-                     ("$\\Gamma$", "&Gamma;"),
-                     ("$\\Gamma_0(9)$", "&Gamma;<sub>0</sub>(9)"),
-                     ("$\\Gamma_H(N)$", "&Gamma;<sub>H</sub>(N)"),
-                     ("$k$", "<i>k</i>"),
-                     ("$K$", "<i>K</i>"),
-                     ("$L$", "<i>L</i>"),
-                     ("$\\mathbbF_q[t]$", "<i>F_q[t]</i>"),
-                     ("$Br(k(\\mathcalC)/k)$", "<i>Br(k(C)/k)</i>"),
-                     ("$\\mathcalC$", "<i>C</i>"),
-                     ("$\\mathcalJ$", "<i>J</i>"),
-                     ("$N$", "<i>N</i>"),
-                     ("$\~n$", "&ntilde;"),
-                     ("$p$", "<i>p</i>"),
-                     ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
-                     ("$S_n$", "<i>S_n</i>"),
-                     ("$S_N$", "<i>S_N</i>"),
-                     ("$U_7$", "<i>U_7</i>"),
-                     ("$w$", "<i>w</i>"),
-                     ("$Y^2=X^3+c$", "<i>Y^2=X^3+c</i>"),
-                     ("$Z_N$", "<i>Z_N</i>"),
-                     ("$\zeta(s) - c$", "&zeta;(s) - c")]
+    replace_table = [
+        ("$0$", "0"), ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"), ("$_4$",
+                                                              "<sub>4</sub>"),
+        ("$\~A_2$", "&Atilde;<sub>2</sub>"), ("$f^*$", "f<sup>*</sup>"),
+        ("$q$", "<i>q</i>"), ("$q=0$", "<i>q=0</i>"), ("$D$", "<i>D</i>"),
+        ("$e$", "<i>e</i>"), ("$E_6$", "<i>E_6</i>"), ("$F_4$",
+                                                       "F<sub>4</sub>"),
+        ("$\\Gamma$",
+         "&Gamma;"), ("$\\Gamma_0(9)$",
+                      "&Gamma;<sub>0</sub>(9)"), ("$\\Gamma_H(N)$",
+                                                  "&Gamma;<sub>H</sub>(N)"),
+        ("$k$", "<i>k</i>"), ("$K$",
+                              "<i>K</i>"), ("$L$",
+                                            "<i>L</i>"), ("$\\mathbbF_q[t]$",
+                                                          "<i>F_q[t]</i>"),
+        ("$Br(k(\\mathcalC)/k)$",
+         "<i>Br(k(C)/k)</i>"), ("$\\mathcalC$",
+                                "<i>C</i>"), ("$\\mathcalJ$",
+                                              "<i>J</i>"), ("$N$", "<i>N</i>"),
+        ("$\~n$",
+         "&ntilde;"), ("$p$", "<i>p</i>"), ("$PSL_2(\\mathbb Z)$",
+                                            "<i>PSL_2(Z)</i>"), ("$S_n$",
+                                                                 "<i>S_n</i>"),
+        ("$S_N$", "<i>S_N</i>"), ("$U_7$", "<i>U_7</i>"), ("$w$", "<i>w</i>"),
+        ("$Y^2=X^3+c$", "<i>Y^2=X^3+c</i>"), ("$Z_N$",
+                                              "<i>Z_N</i>"), ("$\zeta(s) - c$",
+                                                              "&zeta;(s) - c")
+    ]
     cleansed_str = copy.copy(s)
     for candidate, target in replace_table:
         cleansed_str = cleansed_str.replace(candidate, target)
     return cleansed_str
+
 
 def replace_special(entry):
     r"""
@@ -929,48 +969,51 @@ def replace_special(entry):
     publication entry as represented by 'entry'. However, all special
     characters are replaced with equivalent characters.
     """
-    replace_table = [("$\\frac{1}{2}$ + \\emph{it}", "1/2 + <i>it</i>"),
-                     ("\\emph{via}", "<i>via</i>"),
-                     ("\\&",        "&amp;"),       # ampersand
-                     ("\\'a",       "&aacute;"),    # a acute
-                     ("\\u{a}",     "&#259;"),      # a breve
-                     ("\\'A",       "&Aacute;"),    # A acute
-                     ("\\`a",       "&agrave;"),    # a grave
-                     ("\\k{a}",     "&#261;"),      # a ogonek (Polish)
-                     ('\\"a',       "&auml;"),      # a umlaut
-                     ("\\'{c}",     "&#263;"),      # c acute (Polish)
-                     ("\\c{c}",     "&ccedil;"),    # c cedilla
-                     ("\\v{c}",     "&#269;"),      # c czech (Czech)
-                     ("\\'e",       "&eacute;"),    # e acute
-                     ("\\'E",       "&Eacute;"),    # E acute
-                     ("\\`e",       "&egrave;"),    # e grave
-                     ("\\k{e}",     "&#281;"),      # e ogonek (Polish)
-                     ('\\"e',       "&euml;"),      # e umlaut
-                     ("\\'i",       "&iacute;"),    # i acute
-                     ("\\`i",       "&igrave;"),    # i grave
-                     ('\\"i',       "&iuml;"),      # i umlaut
-                     ("\\l",        "&#0322;"),     # l bar (Polish)
-                     ("\\tilde{n}", "&ntilde;"),    # n tilde
-                     ("\\'o",       "&oacute;"),    # o acute
-                     ("\\^o",       "&ocirc;"),     # o circumflex
-                     ("\\`o",       "&ograve;"),    # o grave
-                     ('\\"o',       "&ouml;"),      # o umlaut
-                     ("\\o",        "&oslash;"),    # o slash
-                     ("\\c{s}",     "&scedil;"),    # s cedilla
-                     ("\\c{t}",     "&tcedil;"),    # t cedilla
-                     ("\\'u",       "&uacute;"),    # u acute
-                     ("\\^u",       "&ucirc;"),     # u circumflex
-                     ('\\"u',       "&uuml;"),      # u umlaut
-                     ("\\ss",       "&szlig;"),     # sz ligature
-                     ("\\scr{R}",   "&#x211b;"),
-                     ("\\textsc{",  ""),
-                     ("\\texttt{",  ""),
-                     ("{",          ""),
-                     ("}",          "")]
+    replace_table = [
+        ("$\\frac{1}{2}$ + \\emph{it}", "1/2 + <i>it</i>"),
+        ("\\emph{via}", "<i>via</i>"),
+        ("\\&", "&amp;"),  # ampersand
+        ("\\'a", "&aacute;"),  # a acute
+        ("\\u{a}", "&#259;"),  # a breve
+        ("\\'A", "&Aacute;"),  # A acute
+        ("\\`a", "&agrave;"),  # a grave
+        ("\\k{a}", "&#261;"),  # a ogonek (Polish)
+        ('\\"a', "&auml;"),  # a umlaut
+        ("\\'{c}", "&#263;"),  # c acute (Polish)
+        ("\\c{c}", "&ccedil;"),  # c cedilla
+        ("\\v{c}", "&#269;"),  # c czech (Czech)
+        ("\\'e", "&eacute;"),  # e acute
+        ("\\'E", "&Eacute;"),  # E acute
+        ("\\`e", "&egrave;"),  # e grave
+        ("\\k{e}", "&#281;"),  # e ogonek (Polish)
+        ('\\"e', "&euml;"),  # e umlaut
+        ("\\'i", "&iacute;"),  # i acute
+        ("\\`i", "&igrave;"),  # i grave
+        ('\\"i', "&iuml;"),  # i umlaut
+        ("\\l", "&#0322;"),  # l bar (Polish)
+        ("\\tilde{n}", "&ntilde;"),  # n tilde
+        ("\\'o", "&oacute;"),  # o acute
+        ("\\^o", "&ocirc;"),  # o circumflex
+        ("\\`o", "&ograve;"),  # o grave
+        ('\\"o', "&ouml;"),  # o umlaut
+        ("\\o", "&oslash;"),  # o slash
+        ("\\c{s}", "&scedil;"),  # s cedilla
+        ("\\c{t}", "&tcedil;"),  # t cedilla
+        ("\\'u", "&uacute;"),  # u acute
+        ("\\^u", "&ucirc;"),  # u circumflex
+        ('\\"u', "&uuml;"),  # u umlaut
+        ("\\ss", "&szlig;"),  # sz ligature
+        ("\\scr{R}", "&#x211b;"),
+        ("\\textsc{", ""),
+        ("\\texttt{", ""),
+        ("{", ""),
+        ("}", "")
+    ]
     cleansed_entry = copy.copy(entry)
     for candidate, target in replace_table:
         cleansed_entry = cleansed_entry.replace(candidate, target)
     return cleansed_entry
+
 
 def replace_special_url(url):
     r"""
@@ -991,6 +1034,7 @@ def replace_special_url(url):
     for candidate, target in replace_table:
         cleansed_url = cleansed_url.replace(candidate, target)
     return cleansed_url
+
 
 def sort_publications(publications):
     r"""
@@ -1022,6 +1066,7 @@ def sort_publications(publications):
         sorted_publications += [publications.index(item) for item in pub_items]
     return sorted_publications
 
+
 def sort_by_name(publications):
     r"""
     Sort the given list of publications in alphabetical order.
@@ -1041,12 +1086,15 @@ def sort_by_name(publications):
     NAME_INDEX = 0
     POSITION_INDEX = 1
     author_names = [(publications[i]["author"], i)
-                        for i in xrange(len(publications))]
+                    for i in xrange(len(publications))]
     last_names = [(surname(author_names[i][NAME_INDEX]), i)
-                      for i in xrange(len(author_names))]
+                  for i in xrange(len(author_names))]
     sorted_names = sorted(last_names)
-    return [publications[sorted_names[i][POSITION_INDEX]]
-                for i in xrange(len(sorted_names))]
+    return [
+        publications[sorted_names[i][POSITION_INDEX]]
+        for i in xrange(len(sorted_names))
+    ]
+
 
 def sort_by_year(publications):
     r"""
@@ -1067,18 +1115,18 @@ def sort_by_year(publications):
     pairs. Each publication year is a four-digit year. The publications list
     contains items published during that year.
     """
-    item_years = [(publications[i]["year"], i)
-                      for i in xrange(len(publications))]
+    item_years = [(publications[i].get("year", publications[i]['date']), i)
+                  for i in xrange(len(publications))]
     sorted_years = sorted(item_years)
     items_dict = {}
     for year, item in sorted_years:
         if year in items_dict:
-            items_dict.setdefault(
-                year,
-                items_dict[year].append(publications[item]))
+            items_dict.setdefault(year,
+                                  items_dict[year].append(publications[item]))
         else:
             items_dict.setdefault(year, [publications[item]])
     return items_dict
+
 
 def surname(name):
     r"""
@@ -1100,6 +1148,7 @@ def surname(name):
     author_names = name.split(" and ")
     first_author = author_names[0].split()
     return first_author[-1]
+
 
 ##############################
 # the script starts here
