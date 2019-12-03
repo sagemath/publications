@@ -574,7 +574,7 @@ def format_names(names):
     # the string of author names contains more than 2 names
     else:
         formatted_names.insert(-1, "and ")
-        for i in xrange(len(formatted_names) - 2):
+        for i in range(len(formatted_names) - 2):
             formatted_names[i] = "".join([formatted_names[i], ", "])
         return "".join(formatted_names)
 
@@ -1086,13 +1086,13 @@ def sort_by_name(publications):
     NAME_INDEX = 0
     POSITION_INDEX = 1
     author_names = [(publications[i]["author"], i)
-                    for i in xrange(len(publications))]
+                    for i in range(len(publications))]
     last_names = [(surname(author_names[i][NAME_INDEX]), i)
-                  for i in xrange(len(author_names))]
+                  for i in range(len(author_names))]
     sorted_names = sorted(last_names)
     return [
         publications[sorted_names[i][POSITION_INDEX]]
-        for i in xrange(len(sorted_names))
+        for i in range(len(sorted_names))
     ]
 
 
@@ -1116,7 +1116,7 @@ def sort_by_year(publications):
     contains items published during that year.
     """
     item_years = [(publications[i].get("year", publications[i]['date']), i)
-                  for i in xrange(len(publications))]
+                  for i in range(len(publications))]
     sorted_years = sorted(item_years)
     items_dict = {}
     for year, item in sorted_years:
