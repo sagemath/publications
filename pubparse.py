@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 ###########################################################################
 # Copyright (c) 2009--2014 Minh Van Nguyen <mvngu.name@gmail.com>
