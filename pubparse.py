@@ -38,6 +38,8 @@ import re
 import os
 import sys
 from pprint import pprint
+import six
+unicode = six.u
 
 # importing modules from third-party library
 try:
@@ -408,7 +410,7 @@ def format_articles(articles):
             from pprint import pprint
             pprint(article)
             raise ex
-    return map(replace_special, formatted_articles)
+    return list(map(replace_special, formatted_articles))
 
 
 def format_books(books):
@@ -441,7 +443,7 @@ def format_books(books):
         except Exception as ex:
             pprint(book)
             raise ex
-    return map(replace_special, formatted_books)
+    return list(map(replace_special, formatted_books))
 
 
 def format_collections(collections):
@@ -477,7 +479,7 @@ def format_collections(collections):
         ay = entry.get("year", entry['date'])
         htmlstr = "".join([htmlstr, ay, "."])
         formatted_entries.append(htmlstr.strip())
-    return map(replace_special, formatted_entries)
+    return list(map(replace_special, formatted_entries))
 
 
 def format_masterstheses(masterstheses):
@@ -505,7 +507,7 @@ def format_masterstheses(masterstheses):
             htmlstr = "".join([htmlstr, thesis["address"], ", "])
         htmlstr = "".join([htmlstr, thesis["year"], "."])
         formatted_theses.append(htmlstr.strip())
-    return map(replace_special, formatted_theses)
+    return list(map(replace_special, formatted_theses))
 
 
 def format_miscs(miscs, thesis=False):
@@ -549,7 +551,7 @@ def format_miscs(miscs, thesis=False):
         except Exception as ex:
             pprint(entry)
             raise ex
-    return map(replace_special, formatted_miscs)
+    return list(map(replace_special, formatted_miscs))
 
 
 def format_names(names):
@@ -610,7 +612,7 @@ def format_phdtheses(phdtheses):
         except Exception as ex:
             pprint(thesis)
             raise ex
-    return map(replace_special, formatted_theses)
+    return list(map(replace_special, formatted_theses))
 
 
 def format_techreports(techreports):
@@ -642,7 +644,7 @@ def format_techreports(techreports):
         y = report.get("year", report['date'])
         htmlstr = "".join([htmlstr, y, "."])
         formatted_reports.append(htmlstr.strip())
-    return map(replace_special, formatted_reports)
+    return list(map(replace_special, formatted_reports))
 
 
 def format_proceedings(proceedings):
@@ -684,7 +686,7 @@ def format_proceedings(proceedings):
         ay = article.get("year", article['date'])
         htmlstr = "".join([htmlstr, ay, "."])
         formatted_proceedings.append(htmlstr.strip())
-    return map(replace_special, formatted_proceedings)
+    return list(map(replace_special, formatted_proceedings))
 
 
 def format_unpublisheds(unpublisheds):
@@ -716,7 +718,7 @@ def format_unpublisheds(unpublisheds):
         except Exception as ex:
             pprint(entry)
             raise ex
-    return map(replace_special, formatted_entries)
+    return list(map(replace_special, formatted_entries))
 
 
 def html_title(publication):
@@ -801,9 +803,10 @@ def output_html(publications, filename):
     # Sort the publication items. Journal articles, items in collections,
     # and proceedings papers are grouped in one section. Sort these.
     papers = articles + collections + proceedings + techreports
-    sorted_index = sort_publications(
-        publications["articles"] + publications["incollections"] +
-        publications["inproceedings"] + publications["techreports"])
+    sorted_index = sort_publications(publications["articles"] +
+                                     publications["incollections"] +
+                                     publications["inproceedings"] +
+                                     publications["techreports"])
     # insert the new list of articles
     htmlcontent += macro("papers", sorted_index, papers)
 
@@ -918,34 +921,28 @@ def replace_maths(s):
 
     - s -- a string in HTML format.
     """
-    replace_table = [
-        ("$0$", "0"), ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"), ("$_4$",
-                                                              "<sub>4</sub>"),
-        ("$\~A_2$", "&Atilde;<sub>2</sub>"), ("$f^*$", "f<sup>*</sup>"),
-        ("$q$", "<i>q</i>"), ("$q=0$", "<i>q=0</i>"), ("$D$", "<i>D</i>"),
-        ("$e$", "<i>e</i>"), ("$E_6$", "<i>E_6</i>"), ("$F_4$",
-                                                       "F<sub>4</sub>"),
-        ("$\\Gamma$",
-         "&Gamma;"), ("$\\Gamma_0(9)$",
-                      "&Gamma;<sub>0</sub>(9)"), ("$\\Gamma_H(N)$",
-                                                  "&Gamma;<sub>H</sub>(N)"),
-        ("$k$", "<i>k</i>"), ("$K$",
-                              "<i>K</i>"), ("$L$",
-                                            "<i>L</i>"), ("$\\mathbbF_q[t]$",
-                                                          "<i>F_q[t]</i>"),
-        ("$Br(k(\\mathcalC)/k)$",
-         "<i>Br(k(C)/k)</i>"), ("$\\mathcalC$",
-                                "<i>C</i>"), ("$\\mathcalJ$",
-                                              "<i>J</i>"), ("$N$", "<i>N</i>"),
-        ("$\~n$",
-         "&ntilde;"), ("$p$", "<i>p</i>"), ("$PSL_2(\\mathbb Z)$",
-                                            "<i>PSL_2(Z)</i>"), ("$S_n$",
-                                                                 "<i>S_n</i>"),
-        ("$S_N$", "<i>S_N</i>"), ("$U_7$", "<i>U_7</i>"), ("$w$", "<i>w</i>"),
-        ("$Y^2=X^3+c$", "<i>Y^2=X^3+c</i>"), ("$Z_N$",
-                                              "<i>Z_N</i>"), ("$\zeta(s) - c$",
-                                                              "&zeta;(s) - c")
-    ]
+    replace_table = [("$0$", "0"), ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"),
+                     ("$_4$", "<sub>4</sub>"),
+                     ("$\~A_2$", "&Atilde;<sub>2</sub>"),
+                     ("$f^*$", "f<sup>*</sup>"), ("$q$", "<i>q</i>"),
+                     ("$q=0$", "<i>q=0</i>"), ("$D$", "<i>D</i>"),
+                     ("$e$", "<i>e</i>"), ("$E_6$", "<i>E_6</i>"),
+                     ("$F_4$", "F<sub>4</sub>"), ("$\\Gamma$", "&Gamma;"),
+                     ("$\\Gamma_0(9)$", "&Gamma;<sub>0</sub>(9)"),
+                     ("$\\Gamma_H(N)$", "&Gamma;<sub>H</sub>(N)"),
+                     ("$k$", "<i>k</i>"), ("$K$", "<i>K</i>"),
+                     ("$L$", "<i>L</i>"),
+                     ("$\\mathbbF_q[t]$", "<i>F_q[t]</i>"),
+                     ("$Br(k(\\mathcalC)/k)$", "<i>Br(k(C)/k)</i>"),
+                     ("$\\mathcalC$", "<i>C</i>"),
+                     ("$\\mathcalJ$", "<i>J</i>"), ("$N$", "<i>N</i>"),
+                     ("$\~n$", "&ntilde;"), ("$p$", "<i>p</i>"),
+                     ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
+                     ("$S_n$", "<i>S_n</i>"), ("$S_N$", "<i>S_N</i>"),
+                     ("$U_7$", "<i>U_7</i>"), ("$w$", "<i>w</i>"),
+                     ("$Y^2=X^3+c$", "<i>Y^2=X^3+c</i>"),
+                     ("$Z_N$", "<i>Z_N</i>"),
+                     ("$\zeta(s) - c$", "&zeta;(s) - c")]
     cleansed_str = copy.copy(s)
     for candidate, target in replace_table:
         cleansed_str = cleansed_str.replace(candidate, target)

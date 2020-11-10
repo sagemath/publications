@@ -1,7 +1,7 @@
 .PHONY: clean build
 
 SCRIPT = pubparse.py
-RUN = python $(SCRIPT)
+RUN = python3 $(SCRIPT)
 
 default: build
 
