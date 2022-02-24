@@ -397,13 +397,13 @@ def format_articles(articles):
         try:
             htmlstr = "".join([format_names(article["author"]), ". "])
             htmlstr = "".join([htmlstr, html_title(article)])
-            aj = article.get("journal", article['journaltitle'])
+            aj = article.get("journal", article.get('journaltitle'))
             htmlstr = "".join([htmlstr, aj, ", "])
             for attribute in optional_attributes:
                 if attribute in article:
                     htmlstr = "".join(
                         [htmlstr, attribute, " ", article[attribute], ", "])
-            ay = article.get("year", article['date'])
+            ay = article.get("year", article.get('date'))
             htmlstr = "".join([htmlstr, ay, "."])
             formatted_articles.append(htmlstr.strip())
         except Exception as ex:
@@ -437,7 +437,7 @@ def format_books(books):
             htmlstr = "".join([htmlstr, html_title(book)])
             if "edition" in book:
                 htmlstr = "".join([htmlstr, book["edition"], " edition, "])
-            by = book.get("year", book["date"])
+            by = book.get("year", book.get("date"))
             htmlstr = "".join([htmlstr, book["publisher"], ", ", by, "."])
             formatted_books.append(htmlstr.strip())
         except Exception as ex:
@@ -476,7 +476,7 @@ def format_collections(collections):
             htmlstr = "".join([htmlstr, entry["publisher"], ", "])
         if "pages" in entry:
             htmlstr = "".join([htmlstr, "pages ", entry["pages"], ", "])
-        ay = entry.get("year", entry['date'])
+        ay = entry.get("year", entry.get('date'))
         htmlstr = "".join([htmlstr, ay, "."])
         formatted_entries.append(htmlstr.strip())
     return list(map(replace_special, formatted_entries))
@@ -545,7 +545,7 @@ def format_miscs(miscs, thesis=False):
                 if "http://" in note:
                     note = note[note.find(" "):].strip()
                 htmlstr = "".join([htmlstr, note, ", "])
-            y = entry.get("year", entry['date'])
+            y = entry.get("year", entry.get('date'))
             htmlstr = "".join([htmlstr, y, "."])
             formatted_miscs.append(htmlstr.strip())
         except Exception as ex:
@@ -602,11 +602,11 @@ def format_phdtheses(phdtheses):
             htmlstr = "".join([format_names(thesis["author"]), ". "])
             htmlstr = "".join([htmlstr, html_title(thesis)])
             htmlstr = "".join([htmlstr, "PhD thesis, "])
-            ts = thesis.get('school', thesis['institution'])
+            ts = thesis.get('school', thesis.get('institution'))
             htmlstr = "".join([htmlstr, ts, ", "])
             if "address" in thesis:
                 htmlstr = "".join([htmlstr, thesis["address"], ", "])
-            ty = thesis.get('year', thesis['date'])
+            ty = thesis.get('year', thesis.get('date'))
             htmlstr = "".join([htmlstr, ty, "."])
             formatted_theses.append(htmlstr.strip())
         except Exception as ex:
@@ -641,7 +641,7 @@ def format_techreports(techreports):
         if "number" in report:
             htmlstr = "".join(
                 [htmlstr, "technical report number ", report["number"], ", "])
-        y = report.get("year", report['date'])
+        y = report.get("year", report.get('date'))
         htmlstr = "".join([htmlstr, y, "."])
         formatted_reports.append(htmlstr.strip())
     return list(map(replace_special, formatted_reports))
@@ -683,7 +683,7 @@ def format_proceedings(proceedings):
                 htmlstr = "".join([htmlstr, "Pages ", article["pages"], ", "])
             else:
                 htmlstr = "".join([htmlstr, "pages ", article["pages"], ", "])
-        ay = article.get("year", article['date'])
+        ay = article.get("year", article.get('date'))
         htmlstr = "".join([htmlstr, ay, "."])
         formatted_proceedings.append(htmlstr.strip())
     return list(map(replace_special, formatted_proceedings))
@@ -712,7 +712,7 @@ def format_unpublisheds(unpublisheds):
             htmlstr = "".join([htmlstr, html_title(entry)])
             if "month" in entry:
                 htmlstr = "".join([htmlstr, entry["month"], ", "])
-            y = entry.get('year', entry['date'])
+            y = entry.get('year', entry.get('date'))
             htmlstr = "".join([htmlstr, y, "."])
             formatted_entries.append(htmlstr.strip())
         except Exception as ex:
@@ -1112,7 +1112,7 @@ def sort_by_year(publications):
     pairs. Each publication year is a four-digit year. The publications list
     contains items published during that year.
     """
-    item_years = [(publications[i].get("year", publications[i]['date']), i)
+    item_years = [(publications[i].get("year", publications[i].get('date')), i)
                   for i in range(len(publications))]
     sorted_years = sorted(item_years)
     items_dict = {}
