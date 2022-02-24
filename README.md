@@ -14,7 +14,7 @@ for parsing a BibTeX database.
 
 Install it this way:
 
-    $ pip install -M -U --user pybtex
+    $ pip install -U --user pybtex
 
 The general database of publications that cite Sage is contained in the
 text file named by the variable `publications_general`.
