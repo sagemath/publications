@@ -39,6 +39,7 @@ import os
 import sys
 from pprint import pprint
 import six
+
 unicode = six.u
 
 # importing modules from third-party library
@@ -51,6 +52,7 @@ except:
 
 from pybtex.database.input import bibtex
 from pybtex.style.names.plain import NameStyle
+
 plain = NameStyle().format
 
 # script has to run from the location where it is
@@ -320,10 +322,9 @@ def extract_publication(entry_dict):
     authors_str = str(unicode(plain(authors_list[0]).format()))
     if len(authors_list) > 1:
         for author in authors_list[1:]:
-            authors_str = u"".join([
-                authors_str, " and ",
-                str(unicode(plain(author).format()))
-            ])
+            authors_str = u"".join(
+                [authors_str, " and ",
+                 str(unicode(plain(author).format()))])
     authors_str = authors_str.replace("<nbsp>", " ")
     publication_dict.setdefault("author", authors_str)
     # The editor field is an optional field in BibTeX format.
@@ -921,28 +922,41 @@ def replace_maths(s):
 
     - s -- a string in HTML format.
     """
-    replace_table = [("$0$", "0"), ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"),
-                     ("$_4$", "<sub>4</sub>"),
-                     ("$\~A_2$", "&Atilde;<sub>2</sub>"),
-                     ("$f^*$", "f<sup>*</sup>"), ("$q$", "<i>q</i>"),
-                     ("$q=0$", "<i>q=0</i>"), ("$D$", "<i>D</i>"),
-                     ("$e$", "<i>e</i>"), ("$E_6$", "<i>E_6</i>"),
-                     ("$F_4$", "F<sub>4</sub>"), ("$\\Gamma$", "&Gamma;"),
-                     ("$\\Gamma_0(9)$", "&Gamma;<sub>0</sub>(9)"),
-                     ("$\\Gamma_H(N)$", "&Gamma;<sub>H</sub>(N)"),
-                     ("$k$", "<i>k</i>"), ("$K$", "<i>K</i>"),
-                     ("$L$", "<i>L</i>"),
-                     ("$\\mathbbF_q[t]$", "<i>F_q[t]</i>"),
-                     ("$Br(k(\\mathcalC)/k)$", "<i>Br(k(C)/k)</i>"),
-                     ("$\\mathcalC$", "<i>C</i>"),
-                     ("$\\mathcalJ$", "<i>J</i>"), ("$N$", "<i>N</i>"),
-                     ("$\~n$", "&ntilde;"), ("$p$", "<i>p</i>"),
-                     ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
-                     ("$S_n$", "<i>S_n</i>"), ("$S_N$", "<i>S_N</i>"),
-                     ("$U_7$", "<i>U_7</i>"), ("$w$", "<i>w</i>"),
-                     ("$Y^2=X^3+c$", "<i>Y^2=X^3+c</i>"),
-                     ("$Z_N$", "<i>Z_N</i>"),
-                     ("$\zeta(s) - c$", "&zeta;(s) - c")]
+    replace_table = [
+        ("$0$", "0"),
+        ("$_3F_2(1/4)$", "<i>_3F_2(1/4)</i>"),
+        ("$_4$", "<sub>4</sub>"),
+        ("$\~A_2$", "&Atilde;<sub>2</sub>"),
+        ("$f^*$", "f<sup>*</sup>"),
+        ("$q$", "<i>q</i>"),
+        ("$q=0$", "<i>q=0</i>"),
+        ("$D$", "<i>D</i>"),
+        ("$e$", "<i>e</i>"),
+        ("$E_6$", "<i>E_6</i>"),
+        ("$F_4$", "F<sub>4</sub>"),
+        ("$\\Gamma$", "&Gamma;"),
+        ("$\\Gamma_0(9)$", "&Gamma;<sub>0</sub>(9)"),
+        ("$\\Gamma_H(N)$", "&Gamma;<sub>H</sub>(N)"),
+        ("$k$", "<i>k</i>"),
+        ("$K$", "<i>K</i>"),
+        ("$L$", "<i>L</i>"),
+        ("$\\mathbbF_q[t]$", "<i>F_q[t]</i>"),
+        ("$Br(k(\\mathcalC)/k)$", "<i>Br(k(C)/k)</i>"),
+        ("$\\mathcalC$", "<i>C</i>"),
+        ("$\\mathcalJ$", "<i>J</i>"),
+        ("$N$", "<i>N</i>"),
+        ("$\~n$", "&ntilde;"),
+        ("$p$", "<i>p</i>"),
+        ("$PSL_2(\\mathbb Z)$", "<i>PSL_2(Z)</i>"),
+        ("$S_n$", "<i>S_n</i>"),
+        ("$S_N$", "<i>S_N</i>"),
+        ("$U_7$", "<i>U_7</i>"),
+        ("$w$", "<i>w</i>"),
+        ("$Y^2=X^3+c$", "<i>Y^2=X^3+c</i>"),
+        ("$Z_N$", "<i>Z_N</i>"),
+        (r"$\zeta(s) - c$", "&zeta;(s) - c"),
+        (r"$\mathbb Q$", "<i>Q</i>"),
+    ]
     cleansed_str = copy.copy(s)
     for candidate, target in replace_table:
         cleansed_str = cleansed_str.replace(candidate, target)
