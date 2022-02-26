@@ -1017,8 +1017,6 @@ def replace_special(entry):
         ("\\scr{R}", "&#x211b;"),
         ("\\textsc{", ""),
         ("\\texttt{", ""),
-        ("{", ""),
-        ("}", "")
     ]
     cleansed_entry = copy.copy(entry)
     for candidate, target in replace_table:
