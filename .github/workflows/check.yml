@@ -19,4 +19,4 @@ jobs:
     - name: Install pybtex
       run: pip install pybtex
     - name: Check
-      run: make
+      run: make build-only
