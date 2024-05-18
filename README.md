@@ -1,13 +1,19 @@
 # Sage Publications [![Build Status](https://travis-ci.org/sagemath/publications.svg?branch=master)](https://travis-ci.org/sagemath/publications)
 
+## Call for Help
 
-License: GPLv2+
+There is quite a [backlog of tickets to add papers](https://github.com/sagemath/publications/issues?q=is%3Aissue+is%3Aopen+label%3A%22new+paper%22)
+
+If you feel motivated to help, please fell free to fork the repo and add them.
+
+
+## License: GPLv2+
 
 Authors:
 * Minh Van Nguyen <mvngu.name@gmail.com>
 * Harald Schilly <harald.schilly@gmail.com>
 
-Description:
+## Description:
 
 This script requires [Pybtex](https://launchpad.net/pybtex)
 for parsing a BibTeX database.
