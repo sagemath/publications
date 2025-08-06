@@ -17,6 +17,6 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
     - name: Install pybtex
-      run: pip install pybtex setuptools
+      run: pip install pybtex setuptools six
     - name: Check
       run: make build-only
