@@ -500,14 +500,19 @@ def format_masterstheses(masterstheses):
     """
     formatted_theses = []
     for thesis in masterstheses:
-        htmlstr = "".join([format_names(thesis["author"]), ". "])
-        htmlstr = "".join([htmlstr, html_title(thesis)])
-        htmlstr = "".join([htmlstr, "Masters thesis, "])
-        htmlstr = "".join([htmlstr, thesis["school"], ", "])
-        if "address" in thesis:
-            htmlstr = "".join([htmlstr, thesis["address"], ", "])
-        htmlstr = "".join([htmlstr, thesis["year"], "."])
-        formatted_theses.append(htmlstr.strip())
+        try:
+            htmlstr = "".join([format_names(thesis["author"]), ". "])
+            htmlstr = "".join([htmlstr, html_title(thesis)])
+            htmlstr = "".join([htmlstr, f'{thesis.get("type", "Masters thesis")}, '])
+            htmlstr = "".join([htmlstr, thesis["school"], ", "])
+            if "address" in thesis:
+                htmlstr = "".join([htmlstr, thesis["address"], ", "])
+            ty = thesis.get('year', thesis.get('date'))
+            htmlstr = "".join([htmlstr, ty, "."])
+            formatted_theses.append(htmlstr.strip())
+        except Exception as ex:
+            pprint(thesis)
+            raise ex
     return list(map(replace_special, formatted_theses))
 
 
@@ -602,8 +607,10 @@ def format_phdtheses(phdtheses):
         try:
             htmlstr = "".join([format_names(thesis["author"]), ". "])
             htmlstr = "".join([htmlstr, html_title(thesis)])
-            htmlstr = "".join([htmlstr, "PhD thesis, "])
-            ts = thesis.get('school', thesis.get('institution'))
+
+            htmlstr = "".join([htmlstr, f'{thesis.get("type", "PhD thesis")}, '])
+
+            ts = thesis["school"]
             htmlstr = "".join([htmlstr, ts, ", "])
             if "address" in thesis:
                 htmlstr = "".join([htmlstr, thesis["address"], ", "])
