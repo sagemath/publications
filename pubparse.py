@@ -500,22 +500,7 @@ def format_masterstheses(masterstheses):
     A list of Master's theses all of which are formatted in HTML
     suitable for displaying on websites.
     """
-    formatted_theses = []
-    for thesis in masterstheses:
-        try:
-            htmlstr = "".join([format_names(thesis["author"]), ". "])
-            htmlstr = "".join([htmlstr, html_title(thesis)])
-            htmlstr = "".join([htmlstr, f'{thesis.get("type", "Masters thesis")}, '])
-            htmlstr = "".join([htmlstr, thesis["school"], ", "])
-            if "address" in thesis:
-                htmlstr = "".join([htmlstr, thesis["address"], ", "])
-            ty = thesis.get('year', thesis.get('date'))
-            htmlstr = "".join([htmlstr, ty, "."])
-            formatted_theses.append(htmlstr.strip())
-        except Exception as ex:
-            pprint(thesis)
-            raise ex
-    return list(map(replace_special, formatted_theses))
+    return format_theses(masterstheses, 'Masters thesis')
 
 
 def format_miscs(miscs, thesis=False):
@@ -562,7 +547,7 @@ def format_miscs(miscs, thesis=False):
     return list(map(replace_special, formatted_miscs))
 
 
-def format_names(names):
+def format_names(names) -> str:
     r"""
     Format the given list of author names so that it's suitable for display
     on web pages.
@@ -588,6 +573,44 @@ def format_names(names):
             formatted_names[i] = "".join([formatted_names[i], ", "])
         return "".join(formatted_names)
 
+def format_theses(theses: list[dict[str, str]], thesis_type: str) -> list[str]:
+    r"""
+    Format each thesis in HTML format.
+
+    INPUT:
+
+    - theses -- a list of dictionaries of theses. The mandatory
+      attributes of a thesis are: author, title, school, and year.
+      Some optional attributes include: address, note, and type.
+
+    - thesis_type -- the type of thesis. Used for theses that do
+      not include the `type` optional attribute.
+
+    OUTPUT:
+
+    A list of theses all of which are formatted in HTML
+    suitable for displaying on websites.
+    """
+    formatted_theses: list[str] = []
+    for thesis in theses:
+        try:
+            htmlstr = ''.join([format_names(thesis['author']), '. '])
+            htmlstr = ''.join([htmlstr, html_title(thesis)])
+
+            htmlstr = ''.join([htmlstr, f'{thesis.get('type', thesis_type)}, '])
+
+            ts = thesis['school']
+            htmlstr = ''.join([htmlstr, ts, ', '])
+
+            if 'address' in thesis:
+                htmlstr = ''.join([htmlstr, thesis['address'], ', '])
+
+            htmlstr = ''.join([htmlstr, thesis['year'], '.'])
+            formatted_theses.append(htmlstr.strip())
+        except Exception as ex:
+            pprint(thesis)
+            raise ex
+    return list(map(replace_special, formatted_theses))
 
 def format_phdtheses(phdtheses):
     r"""
@@ -604,25 +627,7 @@ def format_phdtheses(phdtheses):
     A list of PhD theses all of which are formatted in HTML
     suitable for displaying on websites.
     """
-    formatted_theses = []
-    for thesis in phdtheses:
-        try:
-            htmlstr = "".join([format_names(thesis["author"]), ". "])
-            htmlstr = "".join([htmlstr, html_title(thesis)])
-
-            htmlstr = "".join([htmlstr, f'{thesis.get("type", "PhD thesis")}, '])
-
-            ts = thesis["school"]
-            htmlstr = "".join([htmlstr, ts, ", "])
-            if "address" in thesis:
-                htmlstr = "".join([htmlstr, thesis["address"], ", "])
-            ty = thesis.get('year', thesis.get('date'))
-            htmlstr = "".join([htmlstr, ty, "."])
-            formatted_theses.append(htmlstr.strip())
-        except Exception as ex:
-            pprint(thesis)
-            raise ex
-    return list(map(replace_special, formatted_theses))
+    return format_theses(phdtheses, 'PhD thesis')
 
 
 def format_techreports(techreports):
@@ -891,7 +896,7 @@ def process_database(dbfilename):
     inproceedings = []
     mastersthesis = []
     misc = []
-    phdthesis = thesis = []
+    phdthesis = []
     techreport = report = []
     unpublished = []
     # parse the BibTeX database
