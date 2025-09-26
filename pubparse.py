@@ -1,8 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 ###########################################################################
 # Copyright (c) 2009--2014 Minh Van Nguyen <mvngu.name@gmail.com>
 #                          Harald Schilly <harald.schilly@gmail.com>
+#                     2025 Vincent Macri <vincent.macri@ucalgary.ca>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -14,7 +15,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# http://www.gnu.org/licenses/
+# You should have received a copy of the GNU General Public License along
+# with this program. If not, see <https://www.gnu.org/licenses/>.
 ###########################################################################
 
 # This script requires Pybtex for parsing a BibTeX database. See
