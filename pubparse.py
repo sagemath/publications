@@ -594,18 +594,16 @@ def format_theses(theses: list[dict[str, str]], thesis_type: str) -> list[str]:
     formatted_theses: list[str] = []
     for thesis in theses:
         try:
-            htmlstr = ''.join([format_names(thesis['author']), '. '])
-            htmlstr = ''.join([htmlstr, html_title(thesis)])
+            htmlstr = format_names(thesis['author']) + '. '
+            htmlstr += html_title(thesis)
 
-            htmlstr = ''.join([htmlstr, f'{thesis.get('type', thesis_type)}, '])
-
-            ts = thesis['school']
-            htmlstr = ''.join([htmlstr, ts, ', '])
-
+            htmlstr += thesis.get('type', thesis_type) + ', '
+            htmlstr += thesis['school'] + ', '
+            
             if 'address' in thesis:
-                htmlstr = ''.join([htmlstr, thesis['address'], ', '])
+                htmlstr += thesis['address'] + ', '
 
-            htmlstr = ''.join([htmlstr, thesis['year'], '.'])
+            htmlstr += thesis['year'] + '.'
             formatted_theses.append(htmlstr.strip())
         except Exception as ex:
             pprint(thesis)
