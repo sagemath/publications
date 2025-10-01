@@ -36,7 +36,6 @@
 
 # importing modules from Python library
 import copy
-import re
 import os
 import sys
 from pprint import pprint
@@ -72,14 +71,14 @@ html_general = os.path.join(PWD, "publications-general.html")
 # the file containing the Sage-Combinat bibliography formatted in HTML
 html_combinat = os.path.join(PWD, "publications-combinat.html")
 # upstream version of the BibTeX database of Sage-Combinat
-#bibtex_sage_combinat = "http://combinat.sagemath.org/hgwebdir.cgi/misc/raw-file/tip/articles/Sage-Combinat.bib"
+# bibtex_sage_combinat = "http://combinat.sagemath.org/hgwebdir.cgi/misc/raw-file/tip/articles/Sage-Combinat.bib"
 # the file containing the MuPAD-Combinat BibTeX database
 publications_mupad = os.path.join(PWD, "MuPAD-Combinat.bib")
 # the file containing the MuPAD publications list formatted in HTML
 html_mupad = os.path.join(PWD, "publications-mupad.html")
 # MathSciNet
-publications_mathscinet = os.path.join(PWD, 'mathscinet.bib')
-html_mathscinet = os.path.join(PWD, 'publications-mathscinet.html')
+publications_mathscinet = os.path.join(PWD, "mathscinet.bib")
+html_mathscinet = os.path.join(PWD, "publications-mathscinet.html")
 
 # Stuff relating to file permissions.
 # whether we should change the permissions of a file
@@ -316,7 +315,8 @@ def extract_publication(entry_dict):
     for attribute in entry_dict.fields.keys():
         publication_dict.setdefault(
             str(attribute).strip().lower(),
-            unicode(entry_dict.fields[attribute]).strip())
+            unicode(entry_dict.fields[attribute]).strip(),
+        )
     # The author field is a required field in BibTeX format.
     # Extract author names.
     authors_str = ""
@@ -324,9 +324,9 @@ def extract_publication(entry_dict):
     authors_str = str(unicode(plain(authors_list[0]).format()))
     if len(authors_list) > 1:
         for author in authors_list[1:]:
-            authors_str = u"".join(
-                [authors_str, " and ",
-                 str(unicode(plain(author).format()))])
+            authors_str = "".join(
+                [authors_str, " and ", str(unicode(plain(author).format()))]
+            )
     authors_str = authors_str.replace("<nbsp>", " ")
     publication_dict.setdefault("author", authors_str)
     # The editor field is an optional field in BibTeX format.
@@ -337,10 +337,9 @@ def extract_publication(entry_dict):
         editors_str = str(unicode(plain(editors_list[0]).format()))
         if len(editors_list) > 1:
             for editor in editors_list[1:]:
-                editors_str = u"".join([
-                    editors_str, " and ",
-                    str(unicode(plain(editor).format()))
-                ])
+                editors_str = "".join(
+                    [editors_str, " and ", str(unicode(plain(editor).format()))]
+                )
         editors_str = editors_str.replace("<nbsp>", " ")
         publication_dict.setdefault("editor", editors_str)
     return publication_dict
@@ -370,10 +369,7 @@ def filter_undergraduate_theses(publications):
             undergraduate_theses.append(item)
         else:
             preprints.append(item)
-    return {
-        "preprints": preprints,
-        "undergraduatetheses": undergraduate_theses
-    }
+    return {"preprints": preprints, "undergraduatetheses": undergraduate_theses}
 
 
 def format_articles(articles):
@@ -400,17 +396,19 @@ def format_articles(articles):
         try:
             htmlstr = "".join([format_names(article["author"]), ". "])
             htmlstr = "".join([htmlstr, html_title(article)])
-            aj = article.get("journal", article.get('journaltitle'))
+            aj = article.get("journal", article.get("journaltitle"))
             htmlstr = "".join([htmlstr, aj, ", "])
             for attribute in optional_attributes:
                 if attribute in article:
                     htmlstr = "".join(
-                        [htmlstr, attribute, " ", article[attribute], ", "])
-            ay = article.get("year", article.get('date'))
+                        [htmlstr, attribute, " ", article[attribute], ", "]
+                    )
+            ay = article.get("year", article.get("date"))
             htmlstr = "".join([htmlstr, ay, "."])
             formatted_articles.append(htmlstr.strip())
         except Exception as ex:
             from pprint import pprint
+
             pprint(article)
             raise ex
     return list(map(replace_special, formatted_articles))
@@ -472,14 +470,14 @@ def format_collections(collections):
         htmlstr = "".join([htmlstr, html_title(entry)])
         if "editor" in entry:
             htmlstr = "".join(
-                [htmlstr, "In ",
-                 format_names(entry["editor"]), " (ed.). "])
+                [htmlstr, "In ", format_names(entry["editor"]), " (ed.). "]
+            )
         htmlstr = "".join([htmlstr, entry["booktitle"], ". "])
         if "publisher" in entry:
             htmlstr = "".join([htmlstr, entry["publisher"], ", "])
         if "pages" in entry:
             htmlstr = "".join([htmlstr, "pages ", entry["pages"], ", "])
-        ay = entry.get("year", entry.get('date'))
+        ay = entry.get("year", entry.get("date"))
         htmlstr = "".join([htmlstr, ay, "."])
         formatted_entries.append(htmlstr.strip())
     return list(map(replace_special, formatted_entries))
@@ -500,7 +498,7 @@ def format_masterstheses(masterstheses):
     A list of Master's theses all of which are formatted in HTML
     suitable for displaying on websites.
     """
-    return format_theses(masterstheses, 'Masters thesis')
+    return format_theses(masterstheses, "Masters thesis")
 
 
 def format_miscs(miscs, thesis=False):
@@ -536,9 +534,9 @@ def format_miscs(miscs, thesis=False):
                 note = entry["note"]
                 # handle the case: note = {<url> Bachelor thesis},
                 if "http://" in note:
-                    note = note[note.find(" "):].strip()
+                    note = note[note.find(" ") :].strip()
                 htmlstr = "".join([htmlstr, note, ", "])
-            y = entry.get("year", entry.get('date'))
+            y = entry.get("year", entry.get("date"))
             htmlstr = "".join([htmlstr, y, "."])
             formatted_miscs.append(htmlstr.strip())
         except Exception as ex:
@@ -573,6 +571,7 @@ def format_names(names) -> str:
             formatted_names[i] = "".join([formatted_names[i], ", "])
         return "".join(formatted_names)
 
+
 def format_theses(theses: list[dict[str, str]], thesis_type: str) -> list[str]:
     r"""
     Format each thesis in HTML format.
@@ -594,23 +593,22 @@ def format_theses(theses: list[dict[str, str]], thesis_type: str) -> list[str]:
     formatted_theses: list[str] = []
     for thesis in theses:
         try:
-            htmlstr = ''.join([format_names(thesis['author']), '. '])
-            htmlstr = ''.join([htmlstr, html_title(thesis)])
+            htmlstr = format_names(thesis["author"]) + ". "
+            htmlstr += html_title(thesis)
 
-            htmlstr = ''.join([htmlstr, f'{thesis.get('type', thesis_type)}, '])
+            htmlstr += thesis.get("type", thesis_type) + ", "
+            htmlstr += thesis["school"] + ", "
 
-            ts = thesis['school']
-            htmlstr = ''.join([htmlstr, ts, ', '])
+            if "address" in thesis:
+                htmlstr += thesis["address"] + ", "
 
-            if 'address' in thesis:
-                htmlstr = ''.join([htmlstr, thesis['address'], ', '])
-
-            htmlstr = ''.join([htmlstr, thesis['year'], '.'])
+            htmlstr += thesis["year"] + "."
             formatted_theses.append(htmlstr.strip())
         except Exception as ex:
             pprint(thesis)
             raise ex
     return list(map(replace_special, formatted_theses))
+
 
 def format_phdtheses(phdtheses):
     r"""
@@ -627,7 +625,7 @@ def format_phdtheses(phdtheses):
     A list of PhD theses all of which are formatted in HTML
     suitable for displaying on websites.
     """
-    return format_theses(phdtheses, 'PhD thesis')
+    return format_theses(phdtheses, "PhD thesis")
 
 
 def format_techreports(techreports):
@@ -655,8 +653,9 @@ def format_techreports(techreports):
             htmlstr = "".join([htmlstr, report["address"], ", "])
         if "number" in report:
             htmlstr = "".join(
-                [htmlstr, "technical report number ", report["number"], ", "])
-        y = report.get("year", report.get('date'))
+                [htmlstr, "technical report number ", report["number"], ", "]
+            )
+        y = report.get("year", report.get("date"))
         htmlstr = "".join([htmlstr, y, "."])
         formatted_reports.append(htmlstr.strip())
     return list(map(replace_special, formatted_reports))
@@ -684,8 +683,8 @@ def format_proceedings(proceedings):
         htmlstr = "".join([htmlstr, html_title(article)])
         if "editor" in article:
             htmlstr = "".join(
-                [htmlstr, "In ",
-                 format_names(article["editor"]), " (ed.). "])
+                [htmlstr, "In ", format_names(article["editor"]), " (ed.). "]
+            )
         htmlstr = "".join([htmlstr, article["booktitle"], ". "])
         if "publisher" in article:
             htmlstr = "".join([htmlstr, article["publisher"], ", "])
@@ -698,7 +697,7 @@ def format_proceedings(proceedings):
                 htmlstr = "".join([htmlstr, "Pages ", article["pages"], ", "])
             else:
                 htmlstr = "".join([htmlstr, "pages ", article["pages"], ", "])
-        ay = article.get("year", article.get('date'))
+        ay = article.get("year", article.get("date"))
         htmlstr = "".join([htmlstr, ay, "."])
         formatted_proceedings.append(htmlstr.strip())
     return list(map(replace_special, formatted_proceedings))
@@ -727,7 +726,7 @@ def format_unpublisheds(unpublisheds):
             htmlstr = "".join([htmlstr, html_title(entry)])
             if "month" in entry:
                 htmlstr = "".join([htmlstr, entry["month"], ", "])
-            y = entry.get('year', entry.get('date'))
+            y = entry.get("year", entry.get("date"))
             htmlstr = "".join([htmlstr, y, "."])
             formatted_entries.append(htmlstr.strip())
         except Exception as ex:
@@ -764,7 +763,7 @@ def html_title(publication):
     title = publication["title"]
     if url != "":
         if ("http://" in url) or ("https://" in url):
-            return "".join(["<a href=\"", url, "\">", title, "</a>", ". "])
+            return "".join(['<a href="', url, '">', title, "</a>", ". "])
     # handle the case where no URL is provided or the "note" field doesn't
     # contain a URL
     return "".join([title, ". "])
@@ -818,27 +817,32 @@ def output_html(publications, filename):
     # Sort the publication items. Journal articles, items in collections,
     # and proceedings papers are grouped in one section. Sort these.
     papers = articles + collections + proceedings + techreports
-    sorted_index = sort_publications(publications["articles"] +
-                                     publications["incollections"] +
-                                     publications["inproceedings"] +
-                                     publications["techreports"])
+    sorted_index = sort_publications(
+        publications["articles"]
+        + publications["incollections"]
+        + publications["inproceedings"]
+        + publications["techreports"]
+    )
     # insert the new list of articles
     htmlcontent += macro("papers", sorted_index, papers)
 
     # Sort the list of theses. These include PhD, Master's, and undergraduate
     # theses.
     theses = masterstheses + phdtheses + undergradtheses
-    sorted_index = sort_publications(publications["masterstheses"] +
-                                     publications["phdtheses"] +
-                                     miscs["undergraduatetheses"])
+    sorted_index = sort_publications(
+        publications["masterstheses"]
+        + publications["phdtheses"]
+        + miscs["undergraduatetheses"]
+    )
     # insert the new list of theses
     htmlcontent += macro("thesis", sorted_index, theses)
 
     # Sort the list of books. These include both published books and
     # unpublished manuscripts.
     books_list = books + unpublisheds
-    sorted_index = sort_publications(publications["books"] +
-                                     publications["unpublisheds"])
+    sorted_index = sort_publications(
+        publications["books"] + publications["unpublisheds"]
+    )
     htmlcontent += macro("books", sorted_index, books_list)
 
     # Sort the list of preprints.
@@ -908,8 +912,9 @@ def process_database(dbfilename):
         try:
             pub_list.append(extract_publication(bibdb.entries[key]))
         except Exception as ex:
-            #raise ex
+            # raise ex
             import json
+
             print(key)
             print(json.dumps(bibdb.entries[key]))
             raise ex
@@ -923,7 +928,7 @@ def process_database(dbfilename):
         "miscs": misc,
         "phdtheses": phdthesis,
         "techreports": techreport,
-        "unpublisheds": unpublished
+        "unpublisheds": unpublished,
     }
 
 
@@ -1108,14 +1113,13 @@ def sort_by_name(publications):
     """
     NAME_INDEX = 0
     POSITION_INDEX = 1
-    author_names = [(publications[i]["author"], i)
-                    for i in range(len(publications))]
-    last_names = [(surname(author_names[i][NAME_INDEX]), i)
-                  for i in range(len(author_names))]
+    author_names = [(publications[i]["author"], i) for i in range(len(publications))]
+    last_names = [
+        (surname(author_names[i][NAME_INDEX]), i) for i in range(len(author_names))
+    ]
     sorted_names = sorted(last_names)
     return [
-        publications[sorted_names[i][POSITION_INDEX]]
-        for i in range(len(sorted_names))
+        publications[sorted_names[i][POSITION_INDEX]] for i in range(len(sorted_names))
     ]
 
 
@@ -1138,14 +1142,15 @@ def sort_by_year(publications):
     pairs. Each publication year is a four-digit year. The publications list
     contains items published during that year.
     """
-    item_years = [(publications[i].get("year", publications[i].get('date')), i)
-                  for i in range(len(publications))]
+    item_years = [
+        (publications[i].get("year", publications[i].get("date")), i)
+        for i in range(len(publications))
+    ]
     sorted_years = sorted(item_years)
     items_dict = {}
     for year, item in sorted_years:
         if year in items_dict:
-            items_dict.setdefault(year,
-                                  items_dict[year].append(publications[item]))
+            items_dict.setdefault(year, items_dict[year].append(publications[item]))
         else:
             items_dict.setdefault(year, [publications[item]])
     return items_dict
@@ -1182,6 +1187,7 @@ if __name__ == "__main__":
     # os.system("rm " + publications_combinat)
     # os.system("wget " +  bibtex_sage_combinat)
     import sys
+
     if len(sys.argv) >= 2:
         what = sys.argv[1]
     else:
