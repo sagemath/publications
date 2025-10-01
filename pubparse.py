@@ -36,7 +36,6 @@
 
 # importing modules from Python library
 import copy
-import re
 import os
 import sys
 from pprint import pprint
